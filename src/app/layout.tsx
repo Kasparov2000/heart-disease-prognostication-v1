@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import './globals.css'
-import Navbar from "@/app/_components/Navbar";
+import ConvexClientProvider from "@/app/ConvexClientProvider";
+import {Header} from "@/app/header";
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,15 +18,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <div className={'w-screen h-auto bg-gradient-to-b from-blue-50 to-red-100'}>
-          <div className={'minh-[4rem]'}>
-            <Navbar/>
-          </div>
-          <div className={'min-h-[calc(100vh-4rem)]'}>
-            {children}
-          </div>
+          <ConvexClientProvider>
+            <div className={'min-h-[calc(100vh-4rem)]'}>
+              <Header/>
+              {children}
+              <Toaster/>
+            </div>
+          </ConvexClientProvider>
         </div>
       </body>
     </html>

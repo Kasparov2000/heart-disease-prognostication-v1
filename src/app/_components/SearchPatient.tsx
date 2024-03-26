@@ -1,91 +1,43 @@
-"use client"
+import React, {useState, ChangeEvent, useRef, useEffect} from 'react';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
+import { SearchIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Patient } from "@/app/_components/AddPatient";
+import {PatientWithDBFields} from "@/app/_components/SearchPatientResults";
 
-import * as React from "react"
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
+interface SearchPatientProps {
+    setIsSearching: (isSearching: boolean) => void
+    setSearchResults: (patients: PatientWithDBFields[]) => void
+    searchTerm: string
+    setSearchTerm: (searchTerm: string) => void;
+}
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-} from "@/components/ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
 
-const frameworks = [
-    {
-        value: "next.js",
-        label: "Next.js",
-    },
-    {
-        value: "sveltekit",
-        label: "SvelteKit",
-    },
-    {
-        value: "nuxt.js",
-        label: "Nuxt.js",
-    },
-    {
-        value: "remix",
-        label: "Remix",
-    },
-    {
-        value: "astro",
-        label: "Astro",
-    },
-]
 
-export function SearchPatient() {
-    const [open, setOpen] = React.useState(false)
-    const [value, setValue] = React.useState("")
+export function SearchPatient({ setIsSearching, setSearchResults, searchTerm, setSearchTerm }: SearchPatientProps) {
+    const inputRef = useRef(null);
+
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value);
+
+    const patients: PatientWithDBFields[] = useQuery(api.patients.searchPatients, { name: searchTerm }) ?? [];
+
+    useEffect(() => {
+        setSearchResults(patients)
+    }, [patients]);
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-[200px] justify-between"
-                >
-                    {value
-                        ? frameworks.find((framework) => framework.value === value)?.label
-                        : "Select framework..."}
-                    <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
-                <Command>
-                    <CommandInput placeholder="Search framework..." className="h-9" />
-                    <CommandEmpty>No framework found.</CommandEmpty>
-                    <CommandGroup>
-                        {frameworks.map((framework) => (
-                            <CommandItem
-                                key={framework.value}
-                                value={framework.value}
-                                onSelect={(currentValue) => {
-                                    setValue(currentValue === value ? "" : currentValue)
-                                    setOpen(false)
-                                }}
-                            >
-                                {framework.label}
-                                <CheckIcon
-                                    className={cn(
-                                        "ml-auto h-4 w-4",
-                                        value === framework.value ? "opacity-100" : "opacity-0"
-                                    )}
-                                />
-                            </CommandItem>
-                        ))}
-                    </CommandGroup>
-                </Command>
-            </PopoverContent>
-        </Popover>
-    )
+        <div className={'relative flex justify-between gap-2'}>
+            <div className="flex items-center p-2 gap-2">
+                <Input
+                    ref={inputRef}
+                    placeholder={'Search Patient ...'}
+                    value={searchTerm}
+                    onChange={handleInputChange}
+                    onFocus={() => setIsSearching(true)}
+                />
+                <SearchIcon />
+            </div>
+        </div>
+    );
 }
