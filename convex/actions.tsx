@@ -8,7 +8,7 @@ import {internal} from "./_generated/api";
 import {RegisteredAction} from "convex/server";
 
 const webhookSecret = process.env.CLERK_WEBHOOK_SECRET || ``;
-const CLERK_SECRET_KEY = 'sk_test_zCGNJYl9En37GHEqxY4W5iCWKsF4Dj01HPEokgSAdw' || ``;
+const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
 const clerkClient = Clerk({ secretKey: CLERK_SECRET_KEY })
 export const updateApplicationStatus : RegisteredAction<any, any, any> = action({
     args: {
