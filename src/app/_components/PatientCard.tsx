@@ -1,13 +1,12 @@
 import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
 import React from "react";
-import { Patient } from "@/app/dashboard/doctor/page"; // Adjust this import based on your file structure
+import {PatientType} from "@/app/_components/SearchPatientResults";
 
 type PatientCardProps = {
-    patient: Patient;
+    patient: PatientType;
 };
 
-const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
+const PatientCard: React.FC<PatientCardProps> = ({patient}) => {
     // Function to calculate age from date of birth
     const calculateAge = (dob: string) => {
         const birthDate = new Date(dob);
@@ -28,17 +27,19 @@ const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
     const fullAddress = `${patient.city}, ${patient.state}, ${patient.country}`;
 
     return (
-        <div className="flex flex-col justify-center gap-6">
+        <div className="flex flex-col p-2 justify-center items-center h-fit gap-6">
             {/* Profile Image */}
-            {   patient.image &&
-                <Image
-                src={patient.image} // Dynamic image source
-                alt='Patient'
-                width={200}
-                height={200}
-                style={{objectFit: "contain"}}
-                className="rounded-xl"
-            />}
+            {patient.image &&
+                <div className={'w-[200px] h-[133px] rounded-xl bg-yellow-200 overflow-hidden'}>
+                    <Image
+                        src={patient.image} // Dynamic image source
+                        alt='Patient'
+                        width={200}
+                        height={200}
+                        style={{objectFit: "contain"}}
+                    />
+                </div>
+            }
 
             {/* Patient Details */}
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -53,11 +54,6 @@ const PatientCard: React.FC<PatientCardProps> = ({ patient }) => {
 
                 <div className="text-gray-600 font-bold">Address:</div>
                 <div className="overflow-hidden overflow-ellipsis">{fullAddress}</div>
-
-                <div className="text-gray-600 font-bold">Risk:</div>
-                <Badge variant="outline" color={patient.riskLevel === 'Low' ? 'green' : patient.riskLevel === 'Medium' ? 'yellow' : 'red'}>
-                    {patient.riskLevel}
-                </Badge>
             </div>
         </div>
     );

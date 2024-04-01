@@ -1,14 +1,16 @@
 import {mutation, query} from "./_generated/server";
 import {v} from "convex/values";
 
-export const getHospitalById = query({
-    args: { hospitalId: v.id('hospitals') },
+export const getHospital = query({
+    args: {
+        orgId: v.optional(v.string())
+    },
     handler: async (ctx, args) => {
         return await ctx.db
             .query("hospitals")
-            .filter((q) => q.eq(q.field("_id"), args.hospitalId))
+            .filter((q) => q.eq(q.field("orgId"), args.orgId))
             .order("desc")
-            .take(100);
+            .first();
     }
 });
 export const createHospital = mutation({
@@ -24,11 +26,14 @@ export const createHospital = mutation({
         type: v.string(),
         registrationNumber: v.string(),
         taxId: v.optional(v.string()),
-        accreditationDetails: v.optional(v.string()),
-        authorizedContact: v.string(),
-        authorizedEmail: v.string(),
-        authorizedPhone: v.string(),
-        positionTitle: v.string(),
+        doctorName: v.string(),
+        doctorEmail: v.string(),
+        doctorPhone: v.string(),
+        specialization: v.string(),
+        licenseNumber: v.string(),
+        status: v.string(),
+        applicationId: v.id('applications'),
+        orgId: v.string()
     },
     handler: async (ctx, args) => {
         return await ctx.db.insert('hospitals', args);

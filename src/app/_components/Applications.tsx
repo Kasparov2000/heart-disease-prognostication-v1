@@ -44,9 +44,25 @@ import { useQuery } from "convex/react";
 
 import {hospitalSchema} from "@/app/_components/RegistrationForm";
 import {api} from "../../../convex/_generated/api";
+import countries from "../../../lib/countries";
+import Link from "next/link";
+import {Badge} from "@/components/ui/badge";
 
 
 type Hospital = z.infer<typeof hospitalSchema>
+
+const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+        case 'approved':
+            return 'bg-green-500'; // Green for approved
+        case 'pending':
+            return 'bg-yellow-500'; // Yellow for pending
+        case 'declined':
+            return 'bg-red-500'; // Red for declined
+        default:
+            return ''; // A default color, e.g., gray
+    }
+}
 export const columns: ColumnDef<Hospital>[] = [
     {
         id: "select",
@@ -71,10 +87,36 @@ export const columns: ColumnDef<Hospital>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "status",
-        header: "Status",
+        accessorKey: "name",
+        header: "Name",
         cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("status")}</div>
+            <div className="capitalize">{row.getValue("name")}</div>
+        ),
+    },
+    {
+        accessorKey: "country",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Country
+                    <CaretSortIcon className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+        cell: ({ row }) => {
+            const country = countries.find(({ iso_code }) => iso_code === row.getValue("country"));
+            return <div className="capitalize">{country?.country}</div>;
+        }
+        ,
+    },
+    {
+        accessorKey: "phone",
+        header: "Phone",
+        cell: ({ row }) => (
+            <div className="capitalize">{row.getValue("phone")}</div>
         ),
     },
     {
@@ -93,25 +135,28 @@ export const columns: ColumnDef<Hospital>[] = [
         cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
     },
     {
-        accessorKey: "amount",
-        header: () => <div className="text-right">Amount</div>,
-        cell: ({ row }) => {
-            const amount = parseFloat(row.getValue("amount"))
-
-            // Format the amount as a dollar amount
-            const formatted = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-            }).format(amount)
-
-            return <div className="text-right font-medium">{formatted}</div>
-        },
+        accessorKey: "registrationNumber",
+        header: "Registration Number",
+        cell: ({ row }) => (
+            <div className="capitalize">{row.getValue("registrationNumber")}</div>
+        ),
+    },
+    {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => (
+            <div className="capitalize">
+                <Badge className={`${getStatusBadgeClass(row.getValue("status"))}`}>
+                    {row.getValue("status")}
+                </Badge>
+            </div>
+        ),
     },
     {
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => {
-            const payment = row.original
+            const application = row.original
 
             return (
                 <DropdownMenu>
@@ -124,13 +169,17 @@ export const columns: ColumnDef<Hospital>[] = [
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(payment.id)}
+                            onClick={() => navigator.clipboard.writeText(application.registrationNumber)}
                         >
-                            Copy payment ID
+                            Copy Registration Number
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>View customer</DropdownMenuItem>
-                        <DropdownMenuItem>View payment details</DropdownMenuItem>
+                        <Link href={`/admin/applications/${application._id}`}>
+                            <DropdownMenuItem>
+                                View applicant details
+                            </DropdownMenuItem>
+
+                        </Link>
                     </DropdownMenuContent>
                 </DropdownMenu>
             )
@@ -146,7 +195,7 @@ export function Applications() {
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
-    const data = useQuery(api.applications.getApplications)
+    const data = useQuery(api.applications.getApplications) ?? []
 
     const table = useReactTable({
         data,
@@ -168,13 +217,13 @@ export function Applications() {
     })
 
     return (
-        <div className="w-full">
+        <div className="w-full h-full">
             <div className="flex items-center py-4">
                 <Input
-                    placeholder="Filter emails..."
-                    value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+                    placeholder="Filter hospital names..."
+                    value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
-                        table.getColumn("email")?.setFilterValue(event.target.value)
+                        table.getColumn("name")?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
                 />

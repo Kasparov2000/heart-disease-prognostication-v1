@@ -1,6 +1,9 @@
-import React from 'react';
+"use client";
 import {Button} from "@/components/ui/button";
 import {Badge} from "@/components/ui/badge";
+import {SignedIn, useAuth, useOrganization, useOrganizations, useUser} from "@clerk/nextjs";
+import {notFound, useParams, useRouter, useSearchParams} from "next/navigation";
+import {Loader2} from "lucide-react";
 
 function PlanFeatures({ features }: { features: string[] }) {
     return (
@@ -18,10 +21,26 @@ function PlanFeatures({ features }: { features: string[] }) {
 }
 
 function PricingPlans() {
-    const basicFeatures = ["Access for 5 doctors", "Basic heart disease prediction", "Email support"];
-    const standardFeatures = ["Access for 20 doctors", "Patient data storage (up to 5000 records)", "Limited data analytics", "Full support"];
-    const premiumFeatures = ["Unlimited access for doctors", "Patient data storage (unlimited)", "Data analytics","Integration EHR systems"];
+    const basicFeatures = ["Basic heart disease prediction"];
+    const standardFeatures = ["Patient data storage (up to 5000 records)", "Limited data analytics"];
+    const premiumFeatures = ["Patient data storage (unlimited)", "Data analytics"];
+    const user = useAuth()
+    const router = useRouter()
 
+    const searchParams = useSearchParams()
+    const orgId = searchParams.get('orgId')
+
+
+    if (!user.isLoaded) {
+        return (
+            <div className={'w-full h-full'}>
+                <Loader2 className="m-auto h-10 w-10 animate-spin" />
+            </div>
+        )
+    }
+    const handleButtonClick = (planType: 'basic' | 'standard' | 'premium') => {
+        if (orgId) return router.push(`payment/${orgId}?planType=${planType}`)
+    }
 
     return (
         <div className={'min-h-h-[calc(100vh-4rem)] mt-5'}>
@@ -34,13 +53,15 @@ function PricingPlans() {
                     <h3 className={'font-[700] tracking-wide'}>Basic</h3>
                     <p className={'text-gray-500'}>Essential features for small practices</p>
                     <p className={'p'}>
-                        <span className={'text-[2.5rem] font-bold'}>$499</span>
+                        <span className={'text-[2.5rem] font-bold'}>$3.99</span>
                         <span>/month</span>
                     </p>
                     <PlanFeatures features={basicFeatures} />
-                    <Button variant={'outline'} color={'purple'} className={'mt-auto text-blue-600'}>
+                    <SignedIn>
+                        <Button onClick={() => handleButtonClick('basic')} variant={'outline'} color={'purple'} className={'mt-auto text-blue-600'}>
                         <span className={'text-[rgb(99 102 241)]'}>Buy Plan</span>
-                    </Button>
+                        </Button>
+                    </SignedIn>
                 </div>
                 <div className={"flex bg-white flex-col gap-3.5 border-solid border-[1px] pricing:bg-red-100 border-gray-200 w-[405px] h-[544px] mb-2 rounded-[1.5rem] lg:rounded-[0rem] lg:rounded-t-[1.5rem] p-[2.5rem]"}>
                     <div className={'flex justify-between'}>
@@ -49,25 +70,29 @@ function PricingPlans() {
                     </div>
                     <p className={'text-gray-500'}>Enhanced features for mid-sized practices</p>
                     <p className={'p'}>
-                        <span className={'text-[2.5rem] font-bold mt-auto'}>$999</span>
+                        <span className={'text-[2.5rem] font-bold mt-auto'}>$5.99</span>
                         <span>/month</span>
                     </p>
                     <PlanFeatures features={standardFeatures} />
-                    <Button variant={'outline'} className={'mt-auto bg-blue-600 text-white'}>
+                    <SignedIn>
+                        <Button onClick={() => handleButtonClick('standard')} variant={'outline'} className={'mt-auto bg-blue-600 text-white'}>
                         Buy Plan
-                    </Button>
+                        </Button>
+                    </SignedIn>
                 </div>
                 <div className={"flex bg-white flex-col gap-3.5 border-l-[0] border-solid border-[1px] border-gray-200 w-[405px] h-[512px] mb-2 rounded-[1.5rem] lg:rounded-[0rem] lg:rounded-r-[1.5rem] p-[2.5rem]"}>
                     <h3 className={'font-[700] tracking-wide'}>Premium</h3>
                     <p className={'text-gray-500'}>Comprehensive features for large practices</p>
                     <p className={'p'}>
-                        <span className={'text-[2.5rem] font-bold'}>$2999</span>
+                        <span className={'text-[2.5rem] font-bold'}>$9.99</span>
                         <span>/month</span>
                     </p>
                     <PlanFeatures features={premiumFeatures} />
-                    <Button variant={'outline'} className={'text-blue-600 mt-auto'}>
-                        <span>Buy Plan</span>
-                    </Button>
+                    <SignedIn>
+                        <Button onClick={() => handleButtonClick('premium')} variant={'outline'} className={'text-blue-600 mt-auto'}>
+                            <span>Buy Plan</span>
+                        </Button>
+                    </SignedIn>
                 </div>
 
             </div>

@@ -21,6 +21,9 @@ import {useToast} from "@/components/ui/use-toast";
 import {z} from "zod";
 import {useMutation} from "convex/react";
 import {api} from "../../../convex/_generated/api";
+import {Loader2} from "lucide-react";
+import {useRouter} from "next/navigation";
+import {ConvexError} from "convex/values";
 
 
 const formSchema = z.object({
@@ -36,7 +39,7 @@ const formSchema = z.object({
     state: z.string().min(1, 'State/Province is required')
         .regex(/^[a-zA-Z\s-]+$/, 'Invalid state name'),
     zipCode: z.string().min(1, 'ZIP/Postal code is required'),
-    profilePicture: z.any()
+    profilePicture: z.any().optional()
 });
 
 
@@ -47,6 +50,7 @@ export type Patient = z.infer<typeof formSchema>;
 function AddPatient() {
     const [dialogOpen, setDialogOpen] = useState(false)
     const { toast } = useToast();
+    const router = useRouter()
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -95,17 +99,34 @@ function AddPatient() {
             }
 
             const patientSubmissionData = { profilePicId: storageId, ...patientData };
-            const msg = await createPatient(patientSubmissionData);
+            const patientId = await createPatient(patientSubmissionData);
             form.reset()
+            if (!dialogOpen) {
+                setDialogOpen(false)
+            }
             toast({ title: "Patient created", description: "Now you can make predictions" });
+            router.push(`/dashboard/doctor?currentPatient=${patientId}`)
+
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
-            console.log({ errorMessage });
-            toast({
-                variant: "destructive",
-                title: "Something went wrong",
-                description: errorMessage,
-            });
+            const error =
+                err instanceof ConvexError
+                    ? (err.data as { message: string, field: string })
+                    : "Unexpected error occurred";
+
+            if (!(typeof error === "string")) {
+                form.setError(error.field, { type: "custom", message: error.message })
+                toast({
+                    title: 'Registration Failed',
+                    description: error.message,
+                    variant: 'destructive'
+                });
+            } else {
+                toast({
+                    title: 'Registration Failed',
+                    description: error,
+                    variant: 'destructive'
+                });
+            }
         }
     }
 
@@ -297,7 +318,9 @@ function AddPatient() {
                         </div>
                         <DialogFooter>
                             <Button type="reset" onClick={() => form.reset()}>Reset</Button>
-                            <Button type="submit">Save Changes</Button>
+                            <Button type="submit" disabled={form.formState.isSubmitting}>
+                                {form.formState.isSubmitting ? <Loader2 className="m-auto h-4 w-4 animate-spin" /> : <span>Save Changes</span>}
+                            </Button>
                         </DialogFooter>
                     </form>
                 </Form>

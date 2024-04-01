@@ -1,97 +1,171 @@
 'use client';
 
-import {CaretSortIcon, ChevronDownIcon, DotsHorizontalIcon, MagnifyingGlassIcon, PlusIcon} from "@radix-ui/react-icons";
-import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {Checkbox} from "@/components/ui/checkbox";
-import {IconButton} from "@radix-ui/themes";
+import {CaretSortIcon, ChevronDownIcon, DotsHorizontalIcon, PlusIcon} from "@radix-ui/react-icons";
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
-import {useState} from "react";
-
-
-const patientData = [
-    { date: "2023-01-15", risk: "High", improvement: "Deterioration" },
-    { date: "2023-05-20", risk: "Medium", improvement: "Improvement" },
-    { date: "2023-09-10", risk: "Low", improvement: "Improvement" },
-    { date: "2023-12-05", risk: "High", improvement: "Deterioration" },
-    { date: "2024-02-28", risk: "Medium", improvement: "No Change" }
-];
-
-type PredictionResult = {
-    date: string;
-    risk: "High" | "Medium" | "Low";
-    improvement: "Improvement" | "Deterioration" | "No Change";
-};
-
-const columns: ColumnDef<PredictionResult>[] = [
-    { accessorKey: "date", header: "Date" },
-    { accessorKey: "risk", header: "Risk" },
-    { accessorKey: "improvement", header: "Improvement/Deterioration" }
-];
-
-
+    ColumnDef,
+    ColumnFiltersState,
+    SortingState,
+    VisibilityState,
+    flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useReactTable
+} from "@tanstack/react-table";
+import {Button} from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import MeasurementForm from "@/app/_components/MeasurementForm";
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+
 import {useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
-import {getPatientRecords} from "../../../convex/records";
-
-function MeasurementFormDialog() {
-    return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger>
-                            <IconButton className={'ml-2 mr-4 rounded-full bg-green-500'}>
-                                <PlusIcon width="18" height="18" />
-                            </IconButton>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Make new prediction</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Edit profile</DialogTitle>
-                    <DialogDescription>
-                        Make changes to your profile here. Click save when you're done.
-                    </DialogDescription>
-                </DialogHeader>
-                <MeasurementForm/>
-            </DialogContent>
-        </Dialog>
-    )
-}
+import {useRouter} from "next/navigation";
+import Link from "next/link";
+import {Input} from "@/components/ui/input";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {IconButton} from "@radix-ui/themes";
+import {useMemo, useState} from "react";
+import {Checkbox} from "@/components/ui/checkbox";
+import countries from "../../../lib/countries";
+import {Badge} from "@/components/ui/badge";
+import * as React from "react";
+import {DownloadMedicalReport} from "@/app/_components/DownloadMedicalReport";
+import {Id} from "../../../convex/_generated/dataModel";
 
 
-export function PatientHeartPredictionResults() {
+type PredictionResult = {
+    _id: Id<'records'>,
+    _creationTime: string;
+    risk: number;
+    conditionStatus: "deteriorated" | "still" | "improved" | undefined
+};
+
+const getRiskBadgeClass = (risk: number) => {
+    if (risk > 70) return 'bg-red-500';    // Red for high risk
+    if (risk > 30) return 'bg-yellow-500'; // Yellow for moderate risk
+    return 'bg-green-500';                  // Green for low risk
+};
+
+export const columns: ColumnDef<PredictionResult>[] = [
+    {
+        accessorKey: '_id',
+        meta: 'ID',
+        header: 'ID',
+        cell: ({row}) => <div>{row.getValue('_id')}</div>,
+    },
+    {
+        accessorKey: '_creationTime',
+        meta: 'Record At',
+        header: ({column}) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                Recorded At
+                <CaretSortIcon className="ml-2 h-4 w-4"/>
+            </Button>
+        ),
+        cell: ({row}) => {
+            const timestamp = row.getValue('_creationTime'); // Unix timestamp in milliseconds
+            console.log({timestamp})
+            const dateTime = new Date(timestamp);
+            const formattedDateTime = dateTime.toLocaleString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            return (
+                <div>{`${formattedDateTime}`}</div>
+            );
+        },
+    },
+    {
+        accessorKey: 'risk',
+        meta: 'Risk',
+        header: ({column}) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                Risk
+                <CaretSortIcon className="ml-2 h-4 w-4"/>
+            </Button>
+        ),
+        cell: ({row}) => {
+            const risk = row.getValue('risk');
+            return <Badge className={getRiskBadgeClass(risk)}>{risk.toFixed(2)}</Badge>;
+        },
+    },
+    {
+        accessorKey: 'conditionStatus',
+        meta: 'Condition Status',
+        header: ({column}) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                Condition Status
+                <CaretSortIcon className="ml-2 h-4 w-4"/>
+            </Button>
+        ),
+        cell: ({row}) => <div>{row.getValue('conditionStatus')}</div>,
+    },
+    {
+        id: "actions",
+        enableHiding: false,
+        cell: ({row}) => {
+            const record = row.original
+
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <DotsHorizontalIcon className="h-4 w-4"/>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                        <DropdownMenuSeparator/>
+
+                        <DropdownMenuItem>
+                            <DownloadMedicalReport recordId={record._id}/>
+                        </DropdownMenuItem>
+
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )
+        },
+    }
+];
+
+export function DataTable({patientId}: {
+    patientId: string | null
+}) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-    const [rowSelection, setRowSelection] = useState({});
+    const [pagination, setPagination] = useState({pageIndex: 0, pageSize: 5});
+    const router = useRouter();
+    const patientData = useQuery(api.records.getPatientRecords, {patientId}) ?? [];
+
+    const data = useMemo(() => (
+        patientData.map(({_creationTime, _id, risk, conditionStatus}) => ({
+            _id,
+            risk,
+            conditionStatus,
+            _creationTime // Ensure this field is formatted correctly
+        }))
+    ), [patientData]);
 
     const table = useReactTable({
-        data: patientData,
+        data,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -100,96 +174,30 @@ export function PatientHeartPredictionResults() {
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
         state: {
             sorting,
             columnFilters,
             columnVisibility,
-            rowSelection
-        }
-    });
-
-    return (
-        <div className="w-full">
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map(headerGroup => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map(header => {
-                                    return (
-                                        <TableHead key={header.id}>
-                                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                        </TableHead>
-                                    );
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map(row => (
-                                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                                    {row.getVisibleCells().map(cell => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No results.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-        </div>
-    );
-}
-
-export function DataTable({patientId} : {patientId: string}) {
-    const [sorting, setSorting] = useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-    const [rowSelection, setRowSelection] = useState({});
-
-    const patientData = useQuery(api.records.getPatientRecords, {patientId})
-    console.log({patientData})
-
-    const table = useReactTable({
-        data: patientData ?? [],
-        columns,
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
-        state: {
-            sorting,
-            columnFilters,
-            columnVisibility,
-            rowSelection,
+            pagination
         },
     });
+
 
     return (
         <div className="w-full">
             <div className="flex h-full items-center py-4">
 
-                <MeasurementFormDialog/>
+                <IconButton onClick={() => router.push(`/dashboard/doctor/record/${patientId}`)}
+                            className={'ml-2 mr-4 rounded-full bg-green-500'}>
+                    <PlusIcon width="18" height="18"/>
+                </IconButton>
+
 
                 <Input
                     placeholder="Filter date..."
-                    value={(table.getColumn("date")?.getFilterValue() as string) ?? ""}
+                    value={(table.getColumn("_creationTime")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
-                        table.getColumn("date")?.setFilterValue(event.target.value)
+                        table.getColumn("_creationTime")?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
                 />
@@ -197,7 +205,7 @@ export function DataTable({patientId} : {patientId: string}) {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto">
-                            Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
+                            Columns <ChevronDownIcon className="ml-2 h-4 w-4"/>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -211,10 +219,10 @@ export function DataTable({patientId} : {patientId: string}) {
                                         className="capitalize"
                                         checked={column.getIsVisible()}
                                         onCheckedChange={(value) =>
-                                            column.toggleVisibility(value)
+                                            column.toggleVisibility(!!value)
                                         }
                                     >
-                                        {column.id}
+                                        {(column.columnDef.meta as string) || column.id}
                                     </DropdownMenuCheckboxItem>
                                 )
                             })}

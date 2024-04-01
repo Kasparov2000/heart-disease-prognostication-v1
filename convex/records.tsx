@@ -4,6 +4,9 @@ import {undefined} from "zod";
 
 export const createRecord = mutation({
     args: {
+        patientId: v.optional(v.id("patients")),
+        doctorId: v.optional(v.id("doctors")),
+        notes: v.optional(v.string()),
         age: v.number(),
         sex: v.number(),
         cp: v.number(),
@@ -11,26 +14,44 @@ export const createRecord = mutation({
         chol: v.number(),
         fbs: v.number(),
         restecg: v.number(),
-        thalach: v.number(),
         exang: v.number(),
         oldpeak: v.number(),
         slope: v.number(),
         ca: v.number(),
         thal: v.number(),
-        doctorId: v.id('doctors'),
-        patientId: v.id('patients'),
-        hospitalId: v.id('hospitals'),
-        risk: v.string(),
-        notes: v.string(),
+        orgId: v.string()
     },
     handler: async (ctx, args) => {
         // Inserting record data into the 'records' table
         // Returning the newly created record
-        return await ctx.db.insert('records', {
-            risk: args.risk,
-            doctorId: args.doctorId,
+        const risk = Math.floor((Math.random() * 100))
+        if (!args.patientId) return {risk, recordId: null}
+
+        const prevRecord = await ctx.db.query("records")
+            .filter(q => q.eq(q.field("patientId"), args.patientId))
+            .order("desc")
+            .first();
+
+        const hasPrevRisk = prevRecord && prevRecord.risk;
+
+        let conditionStatus;
+        if (hasPrevRisk) {
+            // Compare the current risk with the previous risk
+            if (risk === prevRecord.risk) {
+                conditionStatus = 'still';
+            } else if (risk > prevRecord.risk) {
+                conditionStatus = 'deteriorated';
+            } else {
+                conditionStatus = 'improved';
+            }
+        } else {
+            conditionStatus = 'still'; // No previous risk to compare, so status is 'still'
+        }
+
+        const recordId = await ctx.db.insert('records', {
+            risk: risk,
             patientId: args.patientId,
-            hospitalId: args.hospitalId,
+            doctorId: args.doctorId,
             age: args.age,
             sex: args.sex,
             cp: args.cp,
@@ -38,14 +59,18 @@ export const createRecord = mutation({
             chol: args.chol,
             fbs: args.fbs,
             restecg: args.restecg,
-            thalach: args.thalach,
             exang: args.exang,
             oldpeak: args.oldpeak,
             slope: args.slope,
             ca: args.ca,
+            orgId: args.orgId,
             thal: args.thal,
-            notes: args.notes
+            notes: args.notes,
+            conditionStatus: conditionStatus
         });
+
+
+        return {risk, recordId}
     }
 });
 
@@ -57,5 +82,16 @@ export const getPatientRecords = query({
             .filter((q) => q.eq(q.field("patientId"), args.patientId))
             .order("desc")
             .take(100);
+    },
+});
+
+export const getPatientRecord = query({
+    args: { recordId: v.optional(v.id('records')) },
+    handler: async (ctx, args) => {
+        return await ctx.db
+            .query("records")
+            .filter((q) => q.eq(q.field("_id"), args.recordId))
+            .order("desc")
+            .first();
     },
 });

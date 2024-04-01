@@ -1,9 +1,9 @@
-import { authMiddleware } from "@clerk/nextjs";
+import { NextResponse } from "next/server";
+import { authMiddleware, redirectToSignIn } from "@clerk/nextjs";
 
 export default authMiddleware({
-    publicRoutes: ["/"],
+    publicRoutes: ["/", '/registration', '/about', '/admin(.*)'],
 });
-
 export const config = {
     matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };

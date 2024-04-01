@@ -33,6 +33,8 @@ import {
 import countries from "../../../lib/countries";
 import {toast, useToast} from "@/components/ui/use-toast";
 import SuccessModal from "@/app/_components/SuccessModal";
+import {useRouter} from "next/navigation";
+import RegistrationCompleteDialog from "@/app/_components/RegistrationDialog";
 
 export const hospitalSchema = z.object({
     name: z.string().min(1, 'Hospital name is required'),
@@ -46,31 +48,59 @@ export const hospitalSchema = z.object({
     type: z.string().min(1, 'Type of hospital is required'),
     registrationNumber: z.string().min(1, 'Registration number is required'),
     taxId: z.string().optional(),
-    accreditationDetails: z.string().optional(),
-    authorizedContact: z.string().min(1, 'Authorized contact is required'),
-    authorizedEmail: z.string().email('Invalid email address'),
-    authorizedPhone: z.string().min(1, 'Phone number is required'),
-    positionTitle: z.string().min(1, 'Position/Title is required'),
+    doctorName: z.string().min(1, 'Doctor\'s name is required'),
+    doctorEmail: z.string().email('Invalid email address for doctor'),
+    doctorPhone: z.string().min(1, 'Phone number for doctor is required'),
+    specialization: z.string().min(1, 'Specialization is required'),
+    licenseNumber: z.string().min(1, 'Medical license number is required'),
 });
+
+type hospitalValues = z.infer<typeof hospitalSchema>
+
+const defaultValues = {
+    name: "Sunrise Medical Center",
+    country: "us",
+    city: "Springfield",
+    state: "Illinois",
+    postalCode: "62701",
+    phone: "+1-555-0123",
+    email: "tafara.kasparov0@gmail.com",
+    website: "https://www.sunrisemedical.org",
+    type: "General Hospital",
+    registrationNumber: "REG-123456",
+    taxId: "TAX-987654321",
+    doctorName: "Dr. Jane Smith",
+    doctorEmail: "tafara.kasparov0@gmail.com",
+    doctorPhone: "+1-555-9876",
+    specialization: "Cardiology",
+    licenseNumber: "LIC-2024-XYZ",
+};
 
 
 function HospitalRegistrationForm() {
     const form = useForm<z.infer<typeof hospitalSchema>>({
         resolver: zodResolver(hospitalSchema),
+        defaultValues
     })
 
     const [applicationStatus, setApplicationStatus] = useState<boolean>(false)
-
+    const router = useRouter()
     const submitApplication = useMutation(api.applications.createNewApplication)
-    const toast = useToast()
-    async function onSubmit(values: z.infer<typeof hospitalSchema>) {
+    const [open, setOpen] = useState<boolean>(false);
+    const {toast} = useToast()
+    async function onSubmit(values: hospitalValues) {
         try {
             await submitApplication(values)
+            form.reset()
+            toast({ title: "Application Successful", description: "Please wait for the decision." });
+            setOpen(true)
 
-        } catch (e) {
-            toast({ title: "Patient created", description: "Now you can make predictions" });
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+            toast({ title: "Application Unsuccessful", description: errorMessage, variant: 'destructive' });
         }
     }
+
     return (
         <>
             {applicationStatus
@@ -78,7 +108,103 @@ function HospitalRegistrationForm() {
             <SuccessModal/>
             :
                 <FormProvider {...form}>
+                    <RegistrationCompleteDialog open={open}/>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-2 rounded shadow-md">
+                        {/* Doctor Details Section */}
+                        <div className="flex rounded-md border-b py-12 border-gray-900/10">
+                            <div className={'w-[30%] text-center'}>
+                                <h2 className="text-base font-semibold leading-7 text-gray-900">Doctor Details</h2>
+                                <p className="mt-1 text-sm leading-6 text-gray-600">Enter the professional details of the doctor.</p>
+                            </div>
+
+                            <div className="w-[65%] flex flex-col gap-10 p-8 rounded-xl shadow-sm bg-white">
+                                {/* Doctor's Name */}
+                                <div className="">
+                                    <FormField
+                                        control={form.control}
+                                        name="doctorName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Doctor's Name</FormLabel>
+                                                <FormControl>
+                                                    <Input  {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                {/* Email */}
+                                <div className="">
+                                    <FormField
+                                        control={form.control}
+                                        name="doctorEmail"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email</FormLabel>
+                                                <FormControl>
+                                                    <Input  {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                {/* Phone Number */}
+                                <div className="">
+                                    <FormField
+                                        control={form.control}
+                                        name="doctorPhone"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Phone Number</FormLabel>
+                                                <FormControl>
+                                                    <PhoneInput  {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+
+                                {/* Specialization */}
+                                <div className="">
+                                    <FormField
+                                        control={form.control}
+                                        name="specialization"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Specialization</FormLabel>
+                                                <FormControl>
+                                                    <Input  {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                {/* Medical License Number */}
+                                <div className="">
+                                    <FormField
+                                        control={form.control}
+                                        name="licenseNumber"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Medical License Number</FormLabel>
+                                                <FormControl>
+                                                    <Input  {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                         {/* Hospital Details Section */}
                         <div className="flex rounded-md border-b py-12 border-gray-900/10">
                             <div className={'w-[30%] text-center'}>
@@ -95,7 +221,7 @@ function HospitalRegistrationForm() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Hospital Name</FormLabel>
-                                                <FormControl>
+                                                <FormControl >
                                                     <Input  {...field} />
                                                 </FormControl>
                                                 <FormMessage />
@@ -147,24 +273,27 @@ function HospitalRegistrationForm() {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>Country</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <SelectTrigger className="w-[180px]">
-                                                        <SelectValue placeholder="Select a country" />
-                                                    </SelectTrigger>
-                                                    <SelectContent sticky={'always'} className={'max-h-[40vh]'}>
-                                                        <SelectGroup>
-                                                            <SelectLabel>Countries</SelectLabel>
-                                                            {countries.map((country) => (
-                                                                <SelectItem
-                                                                    key={country.iso_code}
-                                                                    value={country.iso_code}
-                                                                >
-                                                                    {country.country}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
+                                                <FormControl>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <SelectTrigger className="w-[180px]">
+                                                            <SelectValue placeholder="Select a country" />
+                                                        </SelectTrigger>
+                                                        <SelectContent sticky={'always'} className={'max-h-[40vh]'}>
+                                                            <SelectGroup>
+                                                                <SelectLabel>Countries</SelectLabel>
+                                                                {countries.map((country) => (
+                                                                    <SelectItem
+                                                                        key={country.iso_code}
+                                                                        value={country.iso_code}
+                                                                    >
+                                                                        {country.country}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectGroup>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormControl>
+
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -301,107 +430,12 @@ function HospitalRegistrationForm() {
                                         )}
                                     />
                                 </div>
-
-                                {/* Accreditation Details */}
-                                <div className="">
-                                    <FormField
-                                        control={form.control}
-                                        name="accreditationDetails"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Accreditation/Certification Details</FormLabel>
-                                                <FormControl>
-                                                    <Textarea  {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
                             </div>
                         </div>
-
-                        {/* Authorized Personnel Details */}
-                        <div className=" flex flex-wrap border-b border-gray-900/10 pb-12">
-                            <div className={'w-[30%] text-center'}>
-                                <h2 className="text-base font-semibold leading-7 text-gray-900">Authorized Personnel Details</h2>
-                                <p className="mt-1 text-sm leading-6 text-gray-600">Contact details of authorized personnel.</p>
-                            </div>
-
-                            <div className="w-[65%] flex flex-col gap-10 p-8 rounded-xl shadow-sm bg-white">
-                                {/* Contact Name */}
-                                <div className="">
-                                    <FormField
-                                        control={form.control}
-                                        name="authorizedContact"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Authorized Personnel Name</FormLabel>
-                                                <FormControl>
-                                                    <Input  {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-
-                                {/* Authorized Email */}
-                                <div className="">
-                                    <FormField
-                                        control={form.control}
-                                        name="authorizedEmail"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Authorized Personnel Email</FormLabel>
-                                                <FormControl>
-                                                    <Input  {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-
-                                {/* Authorized Phone Number */}
-                                <div className="">
-                                    <FormField
-                                        control={form.control}
-                                        name="authorizedPhone"
-                                        render={({ field }) => (
-                                            <FormItem className={''}>
-                                                <FormLabel>Authorized Personnel Phone Number</FormLabel>
-                                                <FormControl>
-                                                    <PhoneInput placeholder="Enter a phone number" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-
-                                {/* Position Title */}
-                                <div className="">
-                                    <FormField
-                                        control={form.control}
-                                        name="positionTitle"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Position/Title</FormLabel>
-                                                <FormControl>
-                                                    <Input  {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                            </div>
-                            {/* Submit Button */}
-                            <div className="mt-6 flex items-center w-[65%]  ml-auto pr-20 justify-end gap-x-6">
-                                <button type="reset" className="text-sm font-semibold leading-6 text-gray-900">Reset</button>
-                                <button type="submit" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
-                            </div>
+                        {/* Submit Button */}
+                        <div className="mt-6 flex items-center w-[65%]  ml-auto pr-20 justify-end gap-x-6">
+                            <button type="reset" className="text-sm font-semibold leading-6 text-gray-900">Reset</button>
+                            <button type="submit" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
                         </div>
                     </form>
                 </FormProvider>
