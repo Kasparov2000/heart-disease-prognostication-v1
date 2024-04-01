@@ -33,6 +33,7 @@
     "clsx": "^2.1.0",
     "cmdk": "^0.2.1",
     "convex": "^1.10.0",
+    "formik": "^2.4.5",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
     "lucide-react": "^0.356.0",
@@ -45,6 +46,7 @@
     "svix": "^1.21.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
+    "yup": "^1.4.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
