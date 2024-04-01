@@ -34,6 +34,7 @@
     "cmdk": "^0.2.1",
     "convex": "^1.10.0",
     "formik": "^2.4.5",
+    "framer-motion": "^11.0.24",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
     "lucide-react": "^0.356.0",
