@@ -108,20 +108,6 @@ const fieldsDetails: Record<string, FieldConfig> = {
 };
 type formTypes = InferType<typeof validationSchema>
 
-const initialValuesTest: formTypes = {
-    age: 12,
-    sex: 1,
-    cp: 1,
-    trtbps: 120,
-    chol: 200,
-    fbs: 1,
-    restecg: 1,
-    exang: 1,
-    oldpeak: 1,
-    slope: 1,
-    ca: 1,
-    thal: 1,
-};
 
 
 
@@ -135,7 +121,24 @@ function MeasurementForm({patientId}: {
     const {user, isSignedIn,} = useUser()
     const doctor = useQuery(api.doctors.getDoctor, {userId: user?.id ?? undefined})
     const predict = useMutation(api.records.createRecord)
+    const [formKey, setFormKey] = useState<number>(0);
     const {toast} = useToast()
+
+
+    const initialValuesTest: formTypes = {
+        age: null,
+        sex: null,
+        cp: null,
+        trtbps: null,
+        chol: null,
+        fbs: null,
+        restecg: null,
+        exang: null,
+        oldpeak: null,
+        slope: null,
+        ca: null,
+        thal: null,
+    };
 
     const handleSubmit = async (values: typeof initialValuesTest, actions: FormikHelpers<typeof validationSchema>) => {
         if (isSignedIn && doctor){
@@ -168,8 +171,9 @@ function MeasurementForm({patientId}: {
         }    };
 
     const handleReset = (formikProps: FormikHelpers<typeof initialValuesTest>) => {
-        formikProps.resetForm({values: initialValuesTest});
-        setOpen(false)
+        formikProps.resetForm({ values: initialValuesTest });
+        setOpen(false);
+        setFormKey(prevKey => prevKey + 1);
     };
 
     return (
@@ -209,8 +213,7 @@ function MeasurementForm({patientId}: {
                                                         ))}
                                                     </Field>
                                                 ) : (
-                                                    <Field type={"text"} name={fieldName}
-                                                           className="w-full p-1 mt-1 placeholder:text-xs"/>
+                                                    <Field type={"text"} name={fieldName} className="w-full p-1 mt-1 placeholder:text-xs"/>
                                                 )}
                                                 <div className="text-xs text-red-500 w-full h-[18px]">
                                                     <ErrorMessage name={fieldName}/>

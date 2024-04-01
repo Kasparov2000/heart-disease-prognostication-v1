@@ -75,7 +75,7 @@ export const createRecord = mutation({
 });
 
 export const getPatientRecords = query({
-    args: { patientId: v.string() },
+    args: { patientId: v.optional(v.id('patients')) },
     handler: async (ctx, args) => {
         return await ctx.db
             .query("records")

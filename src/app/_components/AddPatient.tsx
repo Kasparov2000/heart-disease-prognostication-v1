@@ -114,7 +114,7 @@ function AddPatient() {
                     : "Unexpected error occurred";
 
             if (!(typeof error === "string")) {
-                form.setError(error.field, { type: "custom", message: error.message })
+                form.setError(error.field as 'email' | 'phone' | 'idNumber', { type: "custom", message: error.message })
                 toast({
                     title: 'Registration Failed',
                     description: error.message,

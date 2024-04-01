@@ -10,16 +10,12 @@ import {
     FormItem,
     FormLabel,
     FormControl,
-    FormDescription,
     FormMessage,
 } from '@/components/ui/form';
 
 import { Input} from '@/components/ui/input';
-import { Textarea } from "@/components/ui/textarea"
 import {PhoneInput} from "@/app/_components/PhoneInput";
-import {CountryInput} from "@/app/_components/CountryInput";
 import {api} from "../../../convex/_generated/api";
-import {createNewApplication} from "../../../convex/applications";
 import {useMutation} from "convex/react";
 import {
     Select,
@@ -105,7 +101,7 @@ function HospitalRegistrationForm() {
         <>
             {applicationStatus
             ?
-            <SuccessModal/>
+            <SuccessModal />
             :
                 <FormProvider {...form}>
                     <RegistrationCompleteDialog open={open}/>

@@ -34,23 +34,29 @@ import countries from "../../../lib/countries";
 import {Badge} from "@/components/ui/badge";
 import * as React from "react";
 import {DownloadMedicalReport} from "@/app/_components/DownloadMedicalReport";
-import {Id} from "../../../convex/_generated/dataModel";
+import {Doc, Id} from "../../../convex/_generated/dataModel";
 
 
 type PredictionResult = {
     _id: Id<'records'>,
-    _creationTime: string;
+    _creationTime: number;
     risk: number;
-    conditionStatus: "deteriorated" | "still" | "improved" | undefined
+    conditionStatus: "deteriorated" | "still" | "improved"
 };
 
-const getRiskBadgeClass = (risk: number) => {
-    if (risk > 70) return 'bg-red-500';    // Red for high risk
-    if (risk > 30) return 'bg-yellow-500'; // Yellow for moderate risk
-    return 'bg-green-500';                  // Green for low risk
+const getRiskBadgeClass = (risk: unknown) => {
+    if (typeof risk === 'number') {
+        if (risk > 70) return 'bg-red-500';    // Red for high risk
+        if (risk > 30) return 'bg-yellow-500'; // Yellow for moderate risk
+        return 'bg-green-500';                // Green for low risk
+    }
+    // Handle the case where risk is not a number
+    console.error('Invalid risk value:', risk);
+    return 'bg-gray-500'; // Default or error case
 };
 
-export const columns: ColumnDef<PredictionResult>[] = [
+
+export const columns: ColumnDef<Doc<'records'>>[] = [
     {
         accessorKey: '_id',
         meta: 'ID',
@@ -70,8 +76,7 @@ export const columns: ColumnDef<PredictionResult>[] = [
         ),
         cell: ({row}) => {
             const timestamp = row.getValue('_creationTime'); // Unix timestamp in milliseconds
-            console.log({timestamp})
-            const dateTime = new Date(timestamp);
+            const dateTime = new Date(timestamp as number)
             const formattedDateTime = dateTime.toLocaleString('en-GB', {
                 day: '2-digit',
                 month: '2-digit',
@@ -99,7 +104,11 @@ export const columns: ColumnDef<PredictionResult>[] = [
         ),
         cell: ({row}) => {
             const risk = row.getValue('risk');
-            return <Badge className={getRiskBadgeClass(risk)}>{risk.toFixed(2)}</Badge>;
+            const safeRisk = typeof risk === 'number' ? risk : null;
+            return (
+                <Badge className={getRiskBadgeClass(safeRisk)}>
+                    {safeRisk !== null ? safeRisk.toFixed(2) : 'N/A'}
+                </Badge>);
         },
     },
     {
@@ -146,23 +155,15 @@ export const columns: ColumnDef<PredictionResult>[] = [
 ];
 
 export function DataTable({patientId}: {
-    patientId: string | null
+    patientId: Id<'patients'> | null
 }) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [pagination, setPagination] = useState({pageIndex: 0, pageSize: 5});
     const router = useRouter();
-    const patientData = useQuery(api.records.getPatientRecords, {patientId}) ?? [];
+    const data = useQuery(api.records.getPatientRecords, {patientId: patientId ?? undefined}) ?? [];
 
-    const data = useMemo(() => (
-        patientData.map(({_creationTime, _id, risk, conditionStatus}) => ({
-            _id,
-            risk,
-            conditionStatus,
-            _creationTime // Ensure this field is formatted correctly
-        }))
-    ), [patientData]);
 
     const table = useReactTable({
         data,

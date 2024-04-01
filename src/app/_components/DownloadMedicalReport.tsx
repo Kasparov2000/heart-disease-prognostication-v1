@@ -9,7 +9,7 @@ import autoTable from "jspdf-autotable";
 
 interface ReportParams {
     data: Doc<'records'>;
-    patientDetails: Doc<'patients'>;
+    patientDetails: Doc<'patients'> ;
     doctorDetails: Doc<'doctors'>;
     hospitalDetails: Doc<'hospitals'>;
 }
@@ -67,7 +67,7 @@ function downloadPDF(params: ReportParams) {
     });
 
     // Risk Assessment
-    const startY = doc.lastAutoTable.finalY + 10;
+    const startY = (doc as any).lastAutoTable.finalY + 10;
     doc.text('Risk Assessment:', 10, startY);
     doc.text(`Risk Level: ${params.data.risk}`, 10, startY + 10);
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
-const SuccessModal: React.FC = (message: string) => {
+
+function SuccessModal(){
     const [isModalOpen, setIsModalOpen] = useState(true);
 
     const toggleModal = () => {

@@ -11,9 +11,12 @@ export const getPatient = query({
             .filter((q) => q.eq(q.field("_id"), args.patientId))
             .first();
 
-        const image = patient?.profilePicId ? await ctx.storage.getUrl(patient.profilePicId) : null
+        if (patient) {
+            const image = patient.profilePicId ? await ctx.storage.getUrl(patient.profilePicId) : null
 
-        return {...patient, image}
+            return {...patient, image}
+        }
+
     },
 });
 

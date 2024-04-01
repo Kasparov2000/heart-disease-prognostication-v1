@@ -47,9 +47,8 @@ import {api} from "../../../convex/_generated/api";
 import countries from "../../../lib/countries";
 import Link from "next/link";
 import {Badge} from "@/components/ui/badge";
+import {Doc} from "../../../convex/_generated/dataModel";
 
-
-type Hospital = z.infer<typeof hospitalSchema>
 
 const getStatusBadgeClass = (status: string) => {
     switch (status) {
@@ -63,7 +62,7 @@ const getStatusBadgeClass = (status: string) => {
             return ''; // A default color, e.g., gray
     }
 }
-export const columns: ColumnDef<Hospital>[] = [
+export const columns: ColumnDef<Doc<'applications'>>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -174,7 +173,7 @@ export const columns: ColumnDef<Hospital>[] = [
                             Copy Registration Number
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <Link href={`/admin/applications/${application._id}`}>
+                        <Link href={`/admin/applications/${application?._id}`}>
                             <DropdownMenuItem>
                                 View applicant details
                             </DropdownMenuItem>
