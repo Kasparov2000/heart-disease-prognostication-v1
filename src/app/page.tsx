@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import PricingPlans from "@/app/_components/PricingPlans";
@@ -23,12 +22,6 @@ const Homepage = () => {
     console.log({isSignedIn})
 
     return (
-        <motion.div
-            className="h-full"
-            initial={{ y: "400vh" }}
-            animate={{ y: "0%" }}
-            transition={{ duration: 1 }}
-        >
             <div className="h-auto md:h-full p-0 overflow-y-scroll justify-center">
                 <div className="flex h-[calc(100vh-4rem)] flex-col overflow-y-scroll flex-wrap justify-center lg:flex-row px-4 sm:px-8 md:px-12 lg:px-20 xl:px-48">
                     <div className="p-2 flex flex-col gap-8 items-center lg:justify-center">
@@ -52,7 +45,6 @@ const Homepage = () => {
                 <PricingPlans />
                 <TrustedBy />
             </div>
-        </motion.div>
     );
 };
 
