@@ -6,7 +6,6 @@ import {action} from "./_generated/server";
 import {internal} from "./_generated/api";
 import {RegisteredAction} from "convex/server";
 
-const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY || ``;
 export const updateApplicationStatus : RegisteredAction<any, any, any> = action({
     args: {
         applicationId: v.id("applications"),
@@ -19,6 +18,8 @@ export const updateApplicationStatus : RegisteredAction<any, any, any> = action(
         if (!applicationDetails) {
             throw new Error(`Applicant ${args.applicationId} not found.`)
         }
+        const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY || ``;
+
         const clerkClient = Clerk({ secretKey: CLERK_SECRET_KEY })
 
         const user = await clerkClient.users.createUser({emailAddress: [applicationDetails.doctorEmail]})
