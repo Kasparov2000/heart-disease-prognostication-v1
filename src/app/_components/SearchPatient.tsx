@@ -1,11 +1,10 @@
-import React, { ChangeEvent, useRef, useEffect, useContext } from 'react';
+import React, { ChangeEvent, useContext, useEffect, useMemo } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { SearchIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { PatientType} from "@/app/_components/SearchPatientResults";
-import {PatientContext} from "../../../contexts/PatientContext";
-
+import { PatientType } from "@/app/_components/SearchPatientResults";
+import { PatientContext } from "../../../contexts/PatientContext";
 
 export function SearchPatient() {
     const { state, dispatch } = useContext(PatientContext);
@@ -14,11 +13,16 @@ export function SearchPatient() {
         dispatch({ type: 'SET_SEARCH_TERM', payload: e.target.value });
     };
 
-    const patients: PatientType[] = useQuery(api.patients.searchPatients, { name: state.searchTerm }) ?? [];
+    // Fetch patients based on the current search term
+    const fetchedPatients: PatientType[] = useQuery(api.patients.searchPatients, { name: state.searchTerm }) ?? [];
 
+    // Memoize the fetched patients to avoid unnecessary re-renders
+    const memoizedPatients = useMemo(() => fetchedPatients, [fetchedPatients]);
+
+    // Update search results when patients data changes
     useEffect(() => {
-        dispatch({ type: 'SET_SEARCH_RESULTS', payload: patients });
-    }, [patients, dispatch]);
+        dispatch({ type: 'SET_SEARCH_RESULTS', payload: memoizedPatients });
+    }, [memoizedPatients, dispatch]);
 
     return (
         <div className={'relative flex justify-between gap-2'}>
@@ -32,10 +36,11 @@ export function SearchPatient() {
                             dispatch({ type: 'TOGGLE_IS_SEARCHING', payload: true });
                         }
                     }}
-
                 />
                 <SearchIcon />
             </div>
         </div>
     );
 }
+
+export default SearchPatient;

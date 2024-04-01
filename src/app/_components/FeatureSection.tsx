@@ -29,7 +29,7 @@ function FeatureSection() {
                                 </div>
                                 Organization Management
                             </dt>
-                            <dd className="mt-2 text-base leading-7 text-gray-600">Efficiently manage your organization's data and workflow with intuitive tools and features.</dd>
+                            <dd className="mt-2 text-base leading-7 text-gray-600">Efficiently manage your organization&apos;s data and workflow with intuitive tools and features.</dd>
                         </div>
                         <div className="relative pl-16">
                             <dt className="text-base font-semibold leading-7 text-gray-900">

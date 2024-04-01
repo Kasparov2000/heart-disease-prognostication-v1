@@ -44,7 +44,7 @@ export const hospitalSchema = z.object({
     type: z.string().min(1, 'Type of hospital is required'),
     registrationNumber: z.string().min(1, 'Registration number is required'),
     taxId: z.string().optional(),
-    doctorName: z.string().min(1, 'Doctor\'s name is required'),
+    doctorName: z.string().min(1, 'Doctor name is required'),
     doctorEmail: z.string().email('Invalid email address for doctor'),
     doctorPhone: z.string().min(1, 'Phone number for doctor is required'),
     specialization: z.string().min(1, 'Specialization is required'),
@@ -121,7 +121,7 @@ function HospitalRegistrationForm() {
                                         name="doctorName"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Doctor's Name</FormLabel>
+                                                <FormLabel>Doctor Name</FormLabel>
                                                 <FormControl>
                                                     <Input  {...field} />
                                                 </FormControl>

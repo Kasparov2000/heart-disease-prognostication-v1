@@ -1,4 +1,4 @@
-export const countries = [
+const countries = [
     { iso_code: "AF", country: "Afghanistan" },
     { iso_code: "AL", country: "Albania" },
     { iso_code: "DZ", country: "Algeria" },
@@ -200,4 +200,4 @@ export const countries = [
     { iso_code: "ZW", country: "Zimbabwe" }
 ]
 
-
+export default countries

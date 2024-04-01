@@ -30,7 +30,7 @@ export default function PredictionResult({open, setOpen, patientId, risk, record
         if (patientId) {
             return router.push(`/dashboard/doctor/?currentPatient=${patientId}`)
         }
-    }, [open, patientId])
+    }, [open, patientId, router, setOpen])
 
     return (
         <AlertDialog open={open}>
@@ -51,7 +51,7 @@ export default function PredictionResult({open, setOpen, patientId, risk, record
                             patientId && recordId
                                 ?
                                 <>
-                                    <p className='mt-4 text-sm text-gray-600'>Please review the patient's profile for
+                                    <p className='mt-4 text-sm text-gray-600'>Please review the patient&apos;s profile for
                                         detailed information and suggested actions.</p>
                                     <DownloadMedicalReport recordId={recordId}/>
                                 </>
