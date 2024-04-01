@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useContext } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import getExtremeInitials from "../../../Lib/getExtremeIntials";
+import getExtremeInitials from "../../../lib/getExtremeIntials";
 import { Loader2 } from "lucide-react";
 
 import {Doc} from "../../../convex/_generated/dataModel";
