@@ -51,7 +51,7 @@ function FeatureSection() {
                                 </div>
                                 Data Analytics
                             </dt>
-                            <dd class="mt-2 text-base leading-7 text-gray-600">Gain valuable insights from your data with advanced analytics tools, enabling informed decision-making and strategic planning.</dd>
+                            <dd className="mt-2 text-base leading-7 text-gray-600">Gain valuable insights from your data with advanced analytics tools, enabling informed decision-making and strategic planning.</dd>
                         </div>
                     </dl>
                 </div>

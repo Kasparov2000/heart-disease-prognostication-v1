@@ -5,7 +5,7 @@ import {useAction, useMutation, useQuery} from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import {useParams, useRouter} from "next/navigation";
 import { Id } from "../../../../../convex/_generated/dataModel";
-import countries from "../../../../../lib/countries";
+import {countries} from "../../../../../lib/countries";
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -98,14 +98,14 @@ function InfoItem({ label, value, pristineKey }: { label: string; value: string 
 export default function ApplicationReviewComponent() {
     const params = useParams<{ id: Id<'applications'> }>();
     const data: ApplicationData = useQuery(api.applications.getApplicationDetails, { applicationId: params.id ?? '' }) || {};
-    const applicationDecision = useAction(api.actions.updateApplicationStatus);
+    const applicationDecision = useAction(api.applications.updateApplicationStatus);
     const [feedbackMessage, setFeedbackMessage] = useState('');
     const {toast} = useToast()
     const { createOrganization } = useOrganizationList()
     const router = useRouter()
     const handleApplicationStatusChange = async (newStatus: string) => {
         try {
-            const newHospital = await applicationDecision({ applicationId: data._id, newStatus });
+            await applicationDecision({ applicationId: data._id, newStatus });
             toast({
                 title: "Application accepted",
                 description: `${data.name} has been created.`,
