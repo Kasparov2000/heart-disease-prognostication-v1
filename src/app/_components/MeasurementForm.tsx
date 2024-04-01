@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import {Field, Form, Formik, FormikHelpers, FormikProps, ErrorMessage} from 'formik';
+import {Field, Form, Formik, FormikHelpers, ErrorMessage} from 'formik';
 import * as Yup from 'yup';
-import {DownloadIcon, ReloadIcon} from "@radix-ui/react-icons"
+import {ReloadIcon} from "@radix-ui/react-icons"
 import {Button} from "@/components/ui/button"
 import {
     AlertDialog,
@@ -14,18 +14,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import {useMutation, useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
-import {useRouter} from "next/navigation";
 import {useToast} from "@/components/ui/use-toast";
 import {InferType} from "prop-types";
 import {Doc, Id} from '../../../convex/_generated/dataModel';
 import PredictionResult from "@/app/_components/PredictionResult";
 import Glossary from "@/app/_components/Glossary";
 import PatientCard from "@/app/_components/PatientCard";
-import {jsPDF} from "jspdf";
-import {PatientType} from "@/app/_components/SearchPatientResults";
 import {useUser} from "@clerk/nextjs";
-import {getPatientRecord} from "../../../convex/records";
-import LoadingAnimation from "@/app/_components/Loading";
 
 interface FieldConfig {
     label: string;

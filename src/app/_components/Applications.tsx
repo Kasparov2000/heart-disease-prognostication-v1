@@ -39,12 +39,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import {z} from "zod";
 import { useQuery } from "convex/react";
 
-import {hospitalSchema} from "@/app/_components/RegistrationForm";
 import {api} from "../../../convex/_generated/api";
-import countries from "../../../lib/countries";
+import {countries} from "../../../lib/countries";
 import Link from "next/link";
 import {Badge} from "@/components/ui/badge";
 import {Doc} from "../../../convex/_generated/dataModel";

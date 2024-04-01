@@ -29,8 +29,6 @@ import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {IconButton} from "@radix-ui/themes";
 import {useMemo, useState} from "react";
-import {Checkbox} from "@/components/ui/checkbox";
-import countries from "../../../lib/countries";
 import {Badge} from "@/components/ui/badge";
 import * as React from "react";
 import {DownloadMedicalReport} from "@/app/_components/DownloadMedicalReport";

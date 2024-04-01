@@ -26,7 +26,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import countries from "../../../lib/countries";
+import {countries} from "../../../lib/countries";
 import {toast, useToast} from "@/components/ui/use-toast";
 import SuccessModal from "@/app/_components/SuccessModal";
 import {useRouter} from "next/navigation";
