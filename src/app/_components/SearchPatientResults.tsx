@@ -1,9 +1,10 @@
 import React, { useContext, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {getExtremeInitials} from "../../../lib/getExtremeInitials";
+
 import { Loader2 } from "lucide-react";
 import { Doc } from "../../../convex/_generated/dataModel";
 import { PatientContext } from "../../../contexts/PatientContext";
+import getExtremeInitials from "../../../lib/getExtremeIntials";
 
 export type PatientType = Doc<'patients'> & { image: string | null };
 
