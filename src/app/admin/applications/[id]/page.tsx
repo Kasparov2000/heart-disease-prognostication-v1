@@ -14,7 +14,7 @@ import {ConvexError} from "convex/values";
 import autoTable from "jspdf-autotable";
 import {useAction, useMutation, useQuery} from "convex/react";
 import {api} from "../../../../../convex/_generated/api";
-import {mutationThatApprovesClient} from "../../../../../convex/applications";
+
 
 interface ApplicationReviewProps {
     formData: {
