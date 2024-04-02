@@ -1,8 +1,6 @@
 'use client';
 
-import React, {useState} from 'react';
-import {useAction, useMutation, useQuery} from "convex/react";
-import { api } from "../../../../../convex/_generated/api";
+import  {useState} from 'react';
 import {useParams, useRouter} from "next/navigation";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import {countries} from "../../../../../lib/countries";
@@ -11,10 +9,12 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import {Button} from "@/components/ui/button";
 import {useToast} from "@/components/ui/use-toast";
-import {ToastAction} from "@/components/ui/toast";
 import {useOrganizationList} from "@clerk/nextjs";
 import {ConvexError} from "convex/values";
 import autoTable from "jspdf-autotable";
+import {useAction, useMutation, useQuery} from "convex/react";
+import {api} from "../../../../../convex/_generated/api";
+import {mutationThatApprovesClient} from "../../../../../convex/applications";
 
 interface ApplicationReviewProps {
     formData: {
@@ -98,7 +98,7 @@ function InfoItem({ label, value, pristineKey }: { label: string; value: string 
 export default function ApplicationReviewComponent() {
     const params = useParams<{ id: Id<'applications'> }>();
     const data: ApplicationData = useQuery(api.applications.getApplicationDetails, { applicationId: params.id ?? '' }) || {};
-    const applicationDecision = useAction(api.applications.updateApplicationStatus);
+    const applicationDecision = useMutation(api.applications.applicationDecision);
     const [feedbackMessage, setFeedbackMessage] = useState('');
     const {toast} = useToast()
     const { createOrganization } = useOrganizationList()

@@ -1,4 +1,4 @@
-import {internalMutation, internalQuery, mutation, query} from "./_generated/server";
+import {internalAction, internalMutation, internalQuery, mutation, query} from "./_generated/server";
 import {v} from "convex/values";
 
 "use node";
@@ -8,48 +8,6 @@ import {action} from "./_generated/server";
 import {internal} from "./_generated/api";
 import {RegisteredAction} from "convex/server";
 
-export const updateApplicationStatus = action({
-    args: {
-        applicationId: v.id("applications"),
-        newStatus: v.string()
-    },
-    handler: async (ctx, args) => {
-        const applicationDetails = await ctx.runQuery(internal.applications.getApplicationDetailsInternal, {
-            applicationId: args.applicationId
-        })
-        if (!applicationDetails) {
-            throw new Error(`Applicant ${args.applicationId} not found.`)
-        }
-        const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY || ``;
-
-        const clerkClient = Clerk({secretKey: CLERK_SECRET_KEY})
-
-        const user = await clerkClient.users.createUser({emailAddress: [applicationDetails.doctorEmail]})
-
-        const organization = await clerkClient.organizations.createOrganization({name: applicationDetails.name, createdBy: user.id});
-
-        try {
-            await clerkClient.allowlistIdentifiers.createAllowlistIdentifier({
-                identifier: applicationDetails.doctorEmail,
-                notify: false
-
-            });
-        } catch (e) {
-
-        }
-
-        await clerkClient.invitations.createInvitation({
-            emailAddress: applicationDetails.doctorEmail,
-            redirectUrl: 'http://localhost:3000/',
-            ignoreExisting: true
-        });
-
-        await ctx.runMutation(internal.applications._updateApplicationStatus, {
-            orgId: organization.id, userId: user.id, ...args
-        });
-
-    }
-})
 export const _updateApplicationStatus = internalMutation({
     args: {
         applicationId: v.id("applications"),
@@ -154,5 +112,61 @@ export const createNewApplication = mutation({
             status: 'pending'
         };
         return await ctx.db.insert('applications', newApplication);
+    },
+});
+
+export const _updateApplicationStatusAction = internalAction({
+    args: {
+        applicationId: v.id("applications"),
+        newStatus: v.string()
+    },
+    handler: async (ctx, args) => {
+        const applicationDetails = await ctx.runQuery(internal.applications.getApplicationDetailsInternal, {
+            applicationId: args.applicationId
+        })
+        if (!applicationDetails) {
+            throw new Error(`Applicant ${args.applicationId} not found.`)
+        }
+        const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY || ``;
+
+        const clerkClient = Clerk({secretKey: CLERK_SECRET_KEY})
+
+        const user = await clerkClient.users.createUser({emailAddress: [applicationDetails.doctorEmail]})
+
+        const organization = await clerkClient.organizations.createOrganization({name: applicationDetails.name, createdBy: user.id});
+
+        try {
+            await clerkClient.allowlistIdentifiers.createAllowlistIdentifier({
+                identifier: applicationDetails.doctorEmail,
+                notify: false
+
+            });
+        } catch (e) {
+
+        }
+
+        await clerkClient.invitations.createInvitation({
+            emailAddress: applicationDetails.doctorEmail,
+            redirectUrl: process.env.HOSTING_URL,
+            ignoreExisting: true
+        });
+
+        await ctx.runMutation(internal.applications._updateApplicationStatus, {
+            orgId: organization.id, userId: user.id, ...args
+        });
+
+    }
+})
+
+export const applicationDecision = mutation({
+    args: {
+        applicationId: v.id("applications"),
+        newStatus: v.string()
+    },
+    handler: async (ctx, args) => {
+        internal.applications._updateApplicationStatusAction, {
+            applicationId: args.applicationId,
+            newStatus: args.newStatus
+        };
     },
 });

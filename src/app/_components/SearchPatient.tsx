@@ -1,9 +1,7 @@
-import React, { ChangeEvent, useContext, useEffect, useMemo } from 'react';
+import React, { ChangeEvent, useContext, useEffect } from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import { SearchIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { PatientType } from "@/app/_components/SearchPatientResults";
 import { PatientContext } from "../../../contexts/PatientContext";
 
 export function SearchPatient() {
@@ -14,15 +12,12 @@ export function SearchPatient() {
     };
 
     // Fetch patients based on the current search term
-    const fetchedPatients: PatientType[] = useQuery(api.patients.searchPatients, { name: state.searchTerm }) ?? [];
-
-    // Memoize the fetched patients to avoid unnecessary re-renders
-    const memoizedPatients = useMemo(() => fetchedPatients, [fetchedPatients]);
+    const fetchedPatients = useQuery(api.patients.searchPatients, { name: state.searchTerm }) ?? [];
 
     // Update search results when patients data changes
     useEffect(() => {
-        dispatch({ type: 'SET_SEARCH_RESULTS', payload: memoizedPatients });
-    }, [memoizedPatients, dispatch]);
+        dispatch({ type: 'SET_SEARCH_RESULTS', payload: fetchedPatients });
+    }, [fetchedPatients, dispatch]);
 
     return (
         <div className={'relative flex justify-between gap-2'}>
@@ -37,7 +32,6 @@ export function SearchPatient() {
                         }
                     }}
                 />
-                <SearchIcon />
             </div>
         </div>
     );
