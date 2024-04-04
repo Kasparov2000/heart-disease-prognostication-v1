@@ -14,9 +14,10 @@ import LoadingAnimation from "@/app/_components/Loading";
 import MeasurementForm from "@/app/_components/MeasurementForm";
 import {Id} from "../../../../convex/_generated/dataModel";
 import {initialState, PatientContext, patientReducer} from "../../../../contexts/PatientContext";
-import {CaretSortIcon, SwitchIcon} from "@radix-ui/react-icons";
+import {CaretSortIcon, ResetIcon, SwitchIcon} from "@radix-ui/react-icons";
 import {IconButton} from "@radix-ui/themes";
 import PatientCardSkeleton from "@/app/_components/PatientCardSkeleton";
+import {TrashIcon} from "lucide-react";
 
 export default function DoctorDashboard() {
     const searchParams = useSearchParams();
@@ -45,6 +46,10 @@ export default function DoctorDashboard() {
     const handleClickPatientProfileSwitch = useCallback(() => {
         dispatch({'type': 'TOGGLE_IS_SEARCHING', payload: !state.isSearching})
     }, [state.isSearching])
+
+    const handleResetPatientPanel = useCallback(() => {
+        dispatch({'type': 'RESET'})
+    }, [])
 
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
@@ -80,9 +85,16 @@ export default function DoctorDashboard() {
                             </div>
                             <div className={'mx-2 p-2 flex justify-between'}>
                                 <AddPatient/>
-                                <IconButton size={'4'} className={'mr-2'} onClick={handleClickPatientProfileSwitch}>
-                                    <CaretSortIcon/>
-                                </IconButton>
+                                <div className={'w-[20%] flex justify-around'}>
+                                    <IconButton size={'4'} onClick={handleClickPatientProfileSwitch}>
+                                        <CaretSortIcon/>
+                                    </IconButton>
+                                    <IconButton size={'4'}>
+                                        <ResetIcon
+                                            onClick={handleResetPatientPanel}
+                                        />
+                                    </IconButton>
+                                </div>
 
                             </div>
                             <div className="p-1 w-full h-full overflow-hidden overflow-y-scroll">

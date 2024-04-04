@@ -17,7 +17,7 @@ export const SearchPatientResults: React.FC = () => {
         dispatch({ type: 'TOGGLE_IS_SEARCHING', payload: false });
         dispatch({ type: 'SET_SEARCH_TERM', payload: '' });
         return router.replace(`/dashboard/doctor?currentPatient=${patient._id}`)
-    }, [dispatch]);
+    }, [dispatch, router]);
 
 
     return (

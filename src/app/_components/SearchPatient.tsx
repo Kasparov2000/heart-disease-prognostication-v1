@@ -12,7 +12,7 @@ export function SearchPatient() {
         if (queryResult) {
             dispatch({ type: 'SET_SEARCH_RESULTS', payload: queryResult });
         }
-    }, [queryResult]);
+    }, [queryResult, dispatch]);
 
     useEffect(() => {
         if (!queryResult && !state.isLoading) {
@@ -20,7 +20,7 @@ export function SearchPatient() {
         } else if (queryResult && state.isLoading) {
             dispatch({ type: 'SET_IS_LOADING', payload: false });
         }
-    }, [queryResult, state.isLoading]);
+    }, [queryResult, state.isLoading, dispatch]);
 
     const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         dispatch({ type: 'SET_SEARCH_TERM', payload: e.target.value });

@@ -1,5 +1,5 @@
-import React, {createContext} from "react";
-import {PatientType} from "@/app/_components/SearchPatientResults";
+import React, { createContext } from "react";
+import { PatientType } from "@/app/_components/SearchPatientResults";
 
 // State and action types
 interface PatientState {
@@ -7,7 +7,7 @@ interface PatientState {
     isSearching: boolean;
     searchResults: PatientType[];
     searchTerm: string;
-    isLoading: boolean
+    isLoading: boolean;
 }
 
 type PatientAction =
@@ -15,9 +15,9 @@ type PatientAction =
     | { type: 'TOGGLE_IS_SEARCHING'; payload: boolean }
     | { type: 'SET_SEARCH_RESULTS'; payload: PatientType[] }
     | { type: 'SET_SEARCH_TERM'; payload: string }
-    | { type: 'SET_IS_LOADING'; payload: boolean };
+    | { type: 'SET_IS_LOADING'; payload: boolean }
+    | { type: 'RESET' };
 
-// Reducer function
 export const patientReducer = (state: PatientState, action: PatientAction): PatientState => {
     switch (action.type) {
         case 'SET_CURRENT_PATIENT':
@@ -30,6 +30,8 @@ export const patientReducer = (state: PatientState, action: PatientAction): Pati
             return { ...state, searchTerm: action.payload };
         case 'SET_IS_LOADING':
             return { ...state, isLoading: action.payload };
+        case 'RESET':
+            return initialState;
         default:
             return state;
     }
@@ -42,7 +44,8 @@ export const initialState: PatientState = {
     searchTerm: '',
     isLoading: false
 };
+
 export const PatientContext = createContext<{
     state: PatientState;
     dispatch: React.Dispatch<PatientAction>;
-}>({ state: initialState, dispatch: () => null })
+}>({ state: initialState, dispatch: () => null });
