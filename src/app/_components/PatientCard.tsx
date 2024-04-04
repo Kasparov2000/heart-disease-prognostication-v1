@@ -27,13 +27,9 @@ const PatientCard: React.FC<PatientCardProps> = ({patient}) => {
             {/* Profile Image */}
             <div className={'w-[200px] h-[133px] rounded-xl overflow-hidden'}>
                 {
-                    <ImageWithFallback
-                        fallback={patient.sex === 0 ? '/profile-pics-placeholder/female.jpg' : '/profile-pics-placeholder/male.webp'}
-                        src={patient.image ? patient.image : (patient.sex === 0 ? '/profile-pics-placeholder/female' : '/profile-pics-placeholder/male')}
-                        width={200}
-                        height={133}
+                    <image
+                        href={patient.image ? patient.image : (patient.sex === 0 ? '/profile-pics-placeholder/female' : '/profile-pics-placeholder/male')}
                         className="object-fill"
-                        alt={'Profile picture.'}
                     />
 
                 }
