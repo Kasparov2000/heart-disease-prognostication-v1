@@ -157,7 +157,7 @@ function MeasurementForm({patientId}: {
                     </div>
                 }
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-[980px] [&>*]:w-[200px] [&>*:first-child]:hidden p-3 flex flex-wrap gap-5">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="w-[980px] [&>*]:w-[200px] [&>*:first-child]:hidden [&>*:last-child]:w-[980px]  p-3 flex flex-wrap gap-5">
                         <div className={'w-[300px] h-[72px]'}></div>
                         {
                             !patient
