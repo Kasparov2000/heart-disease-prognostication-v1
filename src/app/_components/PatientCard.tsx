@@ -29,10 +29,9 @@ const PatientCard: React.FC<PatientCardProps> = ({patient}) => {
                 {
                     <ImageWithFallback
                         fallback={patient.sex === 0 ? '/profile-pics-placeholder/female.jpg' : '/profile-pics-placeholder/male.webp'}
-                        src={patient.image ? patient.image : (patient.sex === 0 ? '/profile-pics-placeholder/female' : '/profile-pics-placeholder/male')}
+                        src={patient.image ? patient.image : (patient.sex === 0 ? '/profile-pics-placeholder/female.jpg' : '/profile-pics-placeholder/male.webp')}
                         width={200}
                         height={200}
-                        className="object-contain"
                         alt={'Profile picture.'}
                     />
 

@@ -152,13 +152,12 @@ function MeasurementForm({patientId}: {
             <div className={'flex'}>
                 {patientId && patient &&
                     <div
-                        className={'max-w-[274px] h-fit ml-2 pt-3 px-2 rounded-md shadow-accent bg-gradient-to-b from-blue-100 to-red-200'}>
+                        className={'max-w-[280px] h-fit ml-2 pt-3 px-2 rounded-md shadow-accent bg-gradient-to-b from-blue-100 to-red-200'}>
                         <PatientCard patient={patient}/>
                     </div>
                 }
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-[960px] [&>*]:w-[300px] align-baseline [&>*:first-child]:hidden p-3 flex flex-wrap gap-5">
-
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-[980px] [&>*]:w-[200px] [&>*:first-child]:hidden p-3 flex flex-wrap gap-5">
                         <div className={'w-[300px] h-[72px]'}></div>
                         {
                             !patient
