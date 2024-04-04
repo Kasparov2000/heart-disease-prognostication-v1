@@ -20,7 +20,6 @@ export const _updateApplicationStatus = internalMutation({
         await ctx.db.patch(args.applicationId, {status: args.newStatus});
         const application = await ctx.db.get(args.applicationId);
         if (application?.status === 'approved' && application) {
-            console.log('working')
             await ctx.db.insert('users', {
                 userId: args.userId,
                 orgId: args.orgId

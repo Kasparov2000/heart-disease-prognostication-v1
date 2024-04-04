@@ -202,7 +202,7 @@ export function DataTable({patientId, orgId}: {
         <div className="w-full">
             <div className="flex h-full items-center py-4">
                 <IconButton size={'4'} onClick={() => router.push(`/dashboard/doctor/record/${patientId}`)}
-                            className={'ml-2 mr-4 rounded-full bg-green-500'}>
+                            className={'ml-2 mr-2 rounded-full bg-green-500'}>
                     <PlusIcon/>
                 </IconButton>
                 {

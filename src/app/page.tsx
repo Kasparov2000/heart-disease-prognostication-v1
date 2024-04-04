@@ -20,7 +20,6 @@ const Homepage = () => {
         return router.push('/dashboard/doctor/')
     }
 
-    console.log({isSignedIn})
 
     return (
         <motion.div

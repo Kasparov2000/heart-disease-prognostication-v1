@@ -139,7 +139,6 @@ function MeasurementForm({patientId}: {
         }
     }
 
-    console.log({values: form.getValues()})
     return (
         <>
             {risk && recordId ?
@@ -161,7 +160,7 @@ function MeasurementForm({patientId}: {
 
                     <div className={'w-[300px] h-[72px]'}></div>
                     {
-                        patient
+                        !patient
                             ?
                             <FormField
                                 control={form.control}
@@ -313,7 +312,7 @@ function MeasurementForm({patientId}: {
                         )}
                     />
                     {
-                        patient
+                        !patient
                             ?
                             <FormField
                                 control={form.control}

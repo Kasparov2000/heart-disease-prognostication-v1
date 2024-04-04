@@ -43,6 +43,7 @@
     "react-apexcharts": "^1.4.1",
     "react-dom": "^18",
     "react-hook-form": "^7.51.1",
+    "react-image-crop": "^11.0.5",
     "react-phone-number-input": "^3.3.9",
     "react-select": "^5.8.0",
     "svix": "^1.21.0",

@@ -89,7 +89,6 @@ export const DownloadMedicalReport: React.FC<{ recordId: Id<'records'> }> = ({ r
     const patientDetails = useQuery(api.patients.getPatient, {patientId: record?.patientId ?? undefined})
 
     const isReportValid = record && doctorDetails && hospitalDetails && patientDetails
-    console.log({record, doctorDetails, hospitalDetails, patientDetails})
     const handleDownload = () => {
         if (isReportValid)
             downloadPDF({
