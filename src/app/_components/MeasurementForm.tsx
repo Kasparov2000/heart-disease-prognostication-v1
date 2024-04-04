@@ -148,229 +148,232 @@ function MeasurementForm({patientId}: {
             <div className={'w-full flex gap-2 justify-end'}>
                 <Glossary/>
             </div>
-            {patientId && patient &&
-                <div
-                    className={'w-[20%] h-fit ml-2 pt-3 px-2 rounded-md shadow-accent bg-gradient-to-b from-blue-100 to-red-200'}>
-                    <PatientCard patient={patient}/>
-                </div>
-            }
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-[960px] [&>*]:w-[300px] align-baseline [&>*:first-child]:hidden p-3 flex flex-wrap gap-5">
 
-                    <div className={'w-[300px] h-[72px]'}></div>
-                    {
-                        !patient
-                            ?
-                            <FormField
-                                control={form.control}
-                                name="age"
-                                render={({field}) => (
-                                    <FormItem>
-                                        <FormLabel>age</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="age" {...field} />
-                                        </FormControl>
-                                        <FormMessage/>
-                                    </FormItem>
-                                )}
-
-                            />
-                            :
-                            null
-                    }
-
-                    <FormField
-                        control={form.control}
-                        name="cp"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>cp</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="cp" {...field} required/>
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="trtbps"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>trtbps</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="trtbps" {...field} />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="chol"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>chol</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="chol" {...field} />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="fbs"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>fbs</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="fbs" {...field} />
-                                </FormControl>
-
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="restecg"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>restecg</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="restecg" {...field} />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="exang"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>exang</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="exang" {...field} />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="oldpeak"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>oldpeak</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="oldpeak" {...field} />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="slope"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>slope</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="slope" {...field} />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="ca"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>ca</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="ca" {...field} />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="thal"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>thal</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="thal" {...field} />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    {
-                        !patient
-                            ?
-                            <FormField
-                                control={form.control}
-                                name="sex"
-                                render={({field}) => (
-                                    <FormItem>
-                                        <FormLabel>sex</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select sex"/>
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="1">Male</SelectItem>
-                                                <SelectItem value="0">Female</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage/>
-                                    </FormItem>
-                                )}
-                            />
-                            :
-                            null
-                    }
-                    <div className="w-full flex py-3 items-center justify-center">
-                        <Button className={'mr-3'} type="submit"
-                                disabled={(form.formState.isSubmitting || !(isSignedIn && doctor))}>
-                            {form.formState.isSubmitting ?
-                                <>
-                                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin"/>
-                                    Please wait
-                                </>
-                                :
-                                <>Submit</>
-                            }
-                        </Button>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button type="reset" variant="destructive">
-                                    Reset
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This action cannot delete the recordings.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => form.reset()}>Continue</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+            <div className={'flex'}>
+                {patientId && patient &&
+                    <div
+                        className={'max-w-[274px] h-fit ml-2 pt-3 px-2 rounded-md shadow-accent bg-gradient-to-b from-blue-100 to-red-200'}>
+                        <PatientCard patient={patient}/>
                     </div>
-                </form>
-            </Form>
+                }
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-[960px] [&>*]:w-[300px] align-baseline [&>*:first-child]:hidden p-3 flex flex-wrap gap-5">
+
+                        <div className={'w-[300px] h-[72px]'}></div>
+                        {
+                            !patient
+                                ?
+                                <FormField
+                                    control={form.control}
+                                    name="age"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>age</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="age" {...field} />
+                                            </FormControl>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+
+                                />
+                                :
+                                null
+                        }
+
+                        <FormField
+                            control={form.control}
+                            name="cp"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>cp</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="cp" {...field} required/>
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="trtbps"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>trtbps</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="trtbps" {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="chol"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>chol</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="chol" {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="fbs"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>fbs</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="fbs" {...field} />
+                                    </FormControl>
+
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="restecg"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>restecg</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="restecg" {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="exang"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>exang</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="exang" {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="oldpeak"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>oldpeak</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="oldpeak" {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="slope"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>slope</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="slope" {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="ca"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>ca</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="ca" {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="thal"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>thal</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="thal" {...field} />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+                        {
+                            !patient
+                                ?
+                                <FormField
+                                    control={form.control}
+                                    name="sex"
+                                    render={({field}) => (
+                                        <FormItem>
+                                            <FormLabel>sex</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select sex"/>
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="1">Male</SelectItem>
+                                                    <SelectItem value="0">Female</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage/>
+                                        </FormItem>
+                                    )}
+                                />
+                                :
+                                null
+                        }
+                        <div className="w-full flex py-3 items-center justify-center">
+                            <Button className={'mr-3'} type="submit"
+                                    disabled={(form.formState.isSubmitting || !(isSignedIn && doctor))}>
+                                {form.formState.isSubmitting ?
+                                    <>
+                                        <ReloadIcon className="mr-2 h-4 w-4 animate-spin"/>
+                                        Please wait
+                                    </>
+                                    :
+                                    <>Submit</>
+                                }
+                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button type="reset" variant="destructive">
+                                        Reset
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot delete the recordings.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => form.reset()}>Continue</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    </form>
+                </Form>
+            </div>
 
         </>
     );
