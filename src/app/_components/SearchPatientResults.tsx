@@ -30,7 +30,7 @@ export const SearchPatientResults: React.FC = () => {
                         {state.searchResults.map(patient => (
                             <li key={patient._id} onClick={() => handleClick(patient)} className="py-4 gap-2 flex flex-row px-2 hover:cursor-pointer hover:bg-violet-100 active:bg-violet-200">
                                 <Avatar>
-                                    <AvatarImage src={patient.image ?? undefined} />
+                                    <AvatarImage src={patient.image} />
                                     <AvatarFallback>{getExtremeInitials(patient.name)}</AvatarFallback>
                                 </Avatar>
                                 <div className="w-[85%]">
