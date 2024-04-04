@@ -7,13 +7,15 @@ interface PatientState {
     isSearching: boolean;
     searchResults: PatientType[];
     searchTerm: string;
+    isLoading: boolean
 }
 
 type PatientAction =
     | { type: 'SET_CURRENT_PATIENT'; payload: PatientType | undefined }
     | { type: 'TOGGLE_IS_SEARCHING'; payload: boolean }
     | { type: 'SET_SEARCH_RESULTS'; payload: PatientType[] }
-    | { type: 'SET_SEARCH_TERM'; payload: string };
+    | { type: 'SET_SEARCH_TERM'; payload: string }
+    | { type: 'SET_IS_LOADING'; payload: boolean };
 
 // Reducer function
 export const patientReducer = (state: PatientState, action: PatientAction): PatientState => {
@@ -26,6 +28,8 @@ export const patientReducer = (state: PatientState, action: PatientAction): Pati
             return { ...state, searchResults: action.payload };
         case 'SET_SEARCH_TERM':
             return { ...state, searchTerm: action.payload };
+        case 'SET_IS_LOADING':
+            return { ...state, isLoading: action.payload };
         default:
             return state;
     }
@@ -35,7 +39,8 @@ export const initialState: PatientState = {
     currentPatient: undefined,
     isSearching: false,
     searchResults: [],
-    searchTerm: ''
+    searchTerm: '',
+    isLoading: false
 };
 export const PatientContext = createContext<{
     state: PatientState;

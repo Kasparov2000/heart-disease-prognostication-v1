@@ -33,14 +33,10 @@ import {Badge} from "@/components/ui/badge";
 import * as React from "react";
 import {DownloadMedicalReport} from "@/app/_components/DownloadMedicalReport";
 import {Doc, Id} from "../../../convex/_generated/dataModel";
+import {BarChart, GitGraphIcon} from "lucide-react";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import ApexChart from "@/app/_components/Chart";
 
-
-type PredictionResult = {
-    _id: Id<'records'>,
-    _creationTime: number;
-    risk: number;
-    conditionStatus: "deteriorated" | "still" | "improved"
-};
 
 const getRiskBadgeClass = (risk: unknown) => {
     if (typeof risk === 'number') {
@@ -53,8 +49,13 @@ const getRiskBadgeClass = (risk: unknown) => {
     return 'bg-gray-500'; // Default or error case
 };
 
+export type Modify<T, R> = Omit<T, keyof R> & R;
+type DocWithCreationTimeString = Modify<Doc<'records'>, {
+    _creationTime: string
+}>
 
-export const columns: ColumnDef<Doc<'records'>>[] = [
+
+export const columns: ColumnDef<DocWithCreationTimeString>[] = [
     {
         accessorKey: '_id',
         meta: 'ID',
@@ -73,17 +74,7 @@ export const columns: ColumnDef<Doc<'records'>>[] = [
             </Button>
         ),
         cell: ({row}) => {
-            const timestamp = row.getValue('_creationTime'); // Unix timestamp in milliseconds
-            const dateTime = new Date(timestamp as number)
-            const formattedDateTime = dateTime.toLocaleString('en-GB', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            });
+            const formattedDateTime = row.getValue('_creationTime'); // Unix timestamp in milliseconds
             return (
                 <div>{`${formattedDateTime}`}</div>
             );
@@ -152,8 +143,23 @@ export const columns: ColumnDef<Doc<'records'>>[] = [
     }
 ];
 
-export function DataTable({patientId}: {
-    patientId: Id<'patients'> | null
+function convertUnixTime(timestamp: number) {
+    const dateTime = new Date(timestamp as number)
+    return dateTime.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+
+}
+
+export function DataTable({patientId, orgId}: {
+    patientId: Id<'patients'>,
+    orgId: string
 }) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -161,10 +167,20 @@ export function DataTable({patientId}: {
     const [pagination, setPagination] = useState({pageIndex: 0, pageSize: 5});
     const router = useRouter();
     const data = useQuery(api.records.getPatientRecords, {patientId: patientId ?? undefined}) ?? [];
+    const checkSubscription = useQuery(api.payments.checkSubscriptionStatus, {
+        orgId
+    });
+
+    const parsedData = useMemo( ()=> {
+        return data.map((patientRecord) => ({
+            ...patientRecord,
+            _creationTime: convertUnixTime(patientRecord._creationTime)
+        }))
+    }, [data])
 
 
     const table = useReactTable({
-        data,
+        data: parsedData,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -185,11 +201,26 @@ export function DataTable({patientId}: {
     return (
         <div className="w-full">
             <div className="flex h-full items-center py-4">
-
-                <IconButton onClick={() => router.push(`/dashboard/doctor/record/${patientId}`)}
+                <IconButton size={'4'} onClick={() => router.push(`/dashboard/doctor/record/${patientId}`)}
                             className={'ml-2 mr-4 rounded-full bg-green-500'}>
-                    <PlusIcon width="18" height="18"/>
+                    <PlusIcon/>
                 </IconButton>
+                {
+                    checkSubscription?.planType === 'premium'
+                        ?
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <IconButton size={'4'} className={'ml-4 mr-2 rounded-full'}>
+                                    <BarChart/>
+                                </IconButton>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[600px]">
+                                <ApexChart patientId={patientId}/>
+                            </PopoverContent>
+                        </Popover>
+                        :
+                        null
+                }
 
 
                 <Input
@@ -303,5 +334,5 @@ export function DataTable({patientId}: {
                 </div>
             </div>
         </div>
-    )
+    );
 }

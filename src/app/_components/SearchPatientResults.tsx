@@ -1,24 +1,28 @@
 import React, { useContext, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
 import { Loader2 } from "lucide-react";
 import { Doc } from "../../../convex/_generated/dataModel";
 import { PatientContext } from "../../../contexts/PatientContext";
 import getExtremeInitials from "../../../lib/getExtremeIntials";
+import {useRouter} from "next/navigation";
 
 export type PatientType = Doc<'patients'> & { image: string | null };
 
 export const SearchPatientResults: React.FC = () => {
     const { state, dispatch } = useContext(PatientContext);
+    const router = useRouter()
 
     const handleClick = useCallback((patient: PatientType) => {
         dispatch({ type: 'SET_CURRENT_PATIENT', payload: patient });
         dispatch({ type: 'TOGGLE_IS_SEARCHING', payload: false });
+        dispatch({ type: 'SET_SEARCH_TERM', payload: '' });
+        return router.replace(`/dashboard/doctor?currentPatient=${patient._id}`)
     }, [dispatch]);
+
 
     return (
         <div className="w-full h-full p-2 overflow-y-scroll">
-            {state.isSearching && state.searchTerm
+            {state.isLoading
                 ? <Loader2 className="mx-auto h-10 w-10 animate-spin" />
                 : state.searchResults.length === 0
                     ? <p className="text-center">No results found.</p>

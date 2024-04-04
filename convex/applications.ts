@@ -121,6 +121,7 @@ export const _updateApplicationStatusAction = internalAction({
         newStatus: v.string()
     },
     handler: async (ctx, args) => {
+        console.log(process.env.HOSTING_URL)
         const applicationDetails = await ctx.runQuery(internal.applications.getApplicationDetailsInternal, {
             applicationId: args.applicationId
         })
@@ -164,9 +165,9 @@ export const applicationDecision = mutation({
         newStatus: v.string()
     },
     handler: async (ctx, args) => {
-        internal.applications._updateApplicationStatusAction, {
+        await ctx.scheduler.runAfter(0, internal.applications._updateApplicationStatusAction, {
             applicationId: args.applicationId,
             newStatus: args.newStatus
-        };
+        });
     },
 });

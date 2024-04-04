@@ -32,6 +32,10 @@ const formSchema = z.object({
     phone: z.string().min(1, 'Phone number is required')
         .regex(/^(\+\d{1,3})?,?\s?\d{8,13}$/, 'Invalid phone number format'),
     dob: z.string(),
+    sex: z.string()
+        .transform((value) => parseInt(value, 10))
+        .refine(sex => [0, 1].includes(sex),
+            {message: 'Invalid Sex. Select Male or Female'}),
     idNumber: z.string().min(1, 'ID number is required'),
     country: z.string().min(1, 'Country is required'),
     city: z.string().min(1, 'City is required')
@@ -196,6 +200,28 @@ function AddPatient() {
                                         <Input type="date" {...field} />
                                     </FormControl>
                                     <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="sex"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>sex</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select sex"/>
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="1">Male</SelectItem>
+                                            <SelectItem value="0">Female</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />

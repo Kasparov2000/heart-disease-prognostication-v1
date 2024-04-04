@@ -84,7 +84,7 @@ export const checkSubscriptionStatus = query({
             .first();
 
         if (!subscription) {
-            return {status: 'notFound', message: 'Subscription record not found.'};
+            return {status: 'NotFoundOrg', message: 'Subscription record not found.'};
         }
 
         const currentDate = new Date();

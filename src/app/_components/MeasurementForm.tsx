@@ -1,13 +1,13 @@
 import React, {useState} from 'react';
-import {Field, Form, Formik, FormikHelpers, ErrorMessage} from 'formik';
-import * as Yup from 'yup';
 import {ReloadIcon} from "@radix-ui/react-icons"
 import {Button} from "@/components/ui/button"
 import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
-    AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger
@@ -15,95 +15,71 @@ import {
 import {useMutation, useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
 import {useToast} from "@/components/ui/use-toast";
-import {InferType} from "prop-types";
 import {Doc, Id} from '../../../convex/_generated/dataModel';
 import PredictionResult from "@/app/_components/PredictionResult";
 import Glossary from "@/app/_components/Glossary";
-import PatientCard from "@/app/_components/PatientCard";
+import PatientCard, {calculateAge} from "@/app/_components/PatientCard";
 import {useUser} from "@clerk/nextjs";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {z} from "zod";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
-interface FieldConfig {
-    label: string;
-    placeholder: string;
-    type?: string;
-    options?: {
-        label: string;
-        value: number
-    }[];
-}
-
-const validationSchema = Yup.object().shape({
-    age: Yup.number()
-        .typeError('Age must be a number')
-        .required('Age is required')
-        .min(0, 'Age seems unrealistic. Please check.')
-        .max(120, 'Age seems too high. Please check.'),
-    sex: Yup.number()
-        .typeError('Gender must be a number')
-        .required('Gender is required')
-        .oneOf([0, 1], 'Invalid gender value'),
-    cp: Yup.number()
-        .typeError('Chest Pain Type must be a number')
-        .required('Chest Pain Type is required')
-        .oneOf([0, 1, 2, 3], 'Invalid Chest Pain Type'),
-    trtbps: Yup.number()
-        .typeError('Resting Blood Pressure must be a number')
-        .required('Resting Blood Pressure is required')
-        .min(50, 'Resting BP seems too low. Please check.')
-        .max(250, 'Resting BP seems too high. Please check.'),
-    chol: Yup.number()
-        .typeError('Serum Cholesterol must be a number')
-        .required('Serum Cholesterol is required')
-        .min(100, 'Cholesterol seems too low. Please check.')
-        .max(600, 'Cholesterol seems too high. Please check.'),
-    fbs: Yup.number()
-        .typeError('Fasting Blood Sugar must be a number')
-        .required('Fasting Blood Sugar is required')
-        .oneOf([0, 1], 'Invalid fasting blood sugar value'),
-    restecg: Yup.number()
-        .typeError('Resting ECG Results must be a number')
-        .required('Resting ECG Results is required')
-        .oneOf([0, 1, 2], 'Invalid ECG result'),
-    exang: Yup.number()
-        .typeError('Exercise-Induced Angina must be a number')
-        .required('Exercise-Induced Angina is required')
-        .oneOf([0, 1], 'Invalid angina value'),
-    oldpeak: Yup.number()
-        .typeError('ST Depression Induced by Exercise must be a number')
-        .required('ST Depression Induced by Exercise is required')
-        .min(0, 'ST Depression value seems too low. Please check.')
-        .max(10, 'ST Depression value seems too high. Please check.'),
-    slope: Yup.number()
-        .typeError('Slope of Peak Exercise ST must be a number')
-        .required('Slope of Peak Exercise ST is required')
-        .oneOf([0, 1, 2], 'Invalid slope value'),
-    ca: Yup.number()
-        .typeError('Number of Major Vessels must be a number')
-        .required('Number of Major Vessels is required')
-        .oneOf([0, 1, 2, 3, 4], 'Invalid number of major vessels'),
-    thal: Yup.number()
-        .typeError('Thalassemia must be a number')
-        .required('Thalassemia is required')
-        .oneOf([0, 1, 2, 3], 'Invalid thalassemia result'),
+const formSchema = z.object({
+    age: z.string()
+        .refine(value => !isNaN(parseInt(value, 10)) && parseInt(value, 10) >= 0 && parseInt(value, 10) <= 120,
+            {message: 'Age should be between 0 and 120.'}),
+    cp: z.string()
+        .refine(value => ['0', '1', '2', '3'].includes(value),
+            {message: 'Invalid Chest Pain Type. Valid options: 0, 1, 2, 3.'}),
+    sex: z.string()
+        .refine(value => ['0', '1'].includes(value),
+            {message: 'Invalid Sex. Select Male or Female'}),
+    trtbps: z.string()
+        .refine(value => !isNaN(parseInt(value, 10)) && parseInt(value, 10) >= 90 && parseInt(value, 10) <= 200,
+            {message: 'Resting BP should be between 90 and 200.'}),
+    chol: z.string()
+        .refine(value => !isNaN(parseInt(value, 10)) && parseInt(value, 10) >= 100 && parseInt(value, 10) <= 500,
+            {message: 'Cholesterol level should be between 100 and 500.'}),
+    fbs: z.string()
+        .refine(value => ['0', '1'].includes(value),
+            {message: 'Invalid fasting blood sugar option. Valid options: 0 or 1.'}),
+    restecg: z.string()
+        .refine(value => ['0', '1', '2'].includes(value),
+            {message: 'Invalid ECG result. Valid options: 0, 1, 2.'}),
+    exang: z.string()
+        .refine(value => ['0', '1'].includes(value),
+            {message: 'Invalid exercise-induced angina option. Valid options: 0 or 1.'}),
+    oldpeak: z.string()
+        .refine(value => !isNaN(parseFloat(value)) && parseFloat(value) >= 0,
+            {message: 'Invalid ST Depression value. Should be a non-negative number.'}),
+    slope: z.string()
+        .refine(value => ['0', '1', '2'].includes(value),
+            {message: 'Invalid slope value. Valid options: 0, 1, 2.'}),
+    ca: z.string()
+        .refine(value => !isNaN(parseInt(value, 10)) && ['0', '1', '2', '3', '4'].includes(value),
+            {message: 'Invalid number of major vessels. Valid options: 0, 1, 2, 3, 4.'}),
+    thal: z.string()
+        .refine(value => ['0', '1', '2', '3'].includes(value),
+            {message: 'Invalid thalassemia result. Valid options: 0, 1, 2, 3.'}),
 });
 
-const fieldsDetails: Record<string, FieldConfig> = {
-    age: {label: 'Age', placeholder: 'Enter Age'},
-    sex: {label: 'Gender', placeholder: 'Select Gender', type: 'select', options: [{label: 'Male', value: 1}, {label: 'Female', value: 0}]},
-    cp: {label: 'Chest Pain Type', placeholder: 'Enter Chest Pain Type'},
-    trtbps: {label: 'Resting Blood Pressure', placeholder: 'Enter Resting Blood Pressure'},
-    chol: {label: 'Serum Cholesterol', placeholder: 'Enter Serum Cholesterol'},
-    fbs: {label: 'Fasting Blood Sugar', placeholder: 'Enter Fasting Blood Sugar'},
-    restecg: {label: 'Resting ECG Results', placeholder: 'Enter Resting ECG Results'},
-    exang: {label: 'Exercise-Induced Angina', placeholder: 'Enter Exercise-Induced Angina'},
-    oldpeak: {label: 'ST Depression Induced by Exercise', placeholder: 'Enter ST Depression Induced by Exercise'},
-    slope: {label: 'Slope of Peak Exercise ST', placeholder: 'Enter Slope of Peak Exercise ST'},
-    ca: {label: 'Number of Major Vessels', placeholder: 'Enter Number of Major Vessels'},
-    thal: {label: 'Thalassemia', placeholder: 'Enter Thalassemia'},
+const defaultValues = {
+    age: '',
+    cp: '',
+    sex: '',
+    trtbps: '',
+    chol: '',
+    fbs: '',
+    restecg: '',
+    exang: '',
+    oldpeak: '',
+    slope: '',
+    ca: '',
+    thal: '',
 };
-type formTypes = InferType<typeof validationSchema>
-
-
 
 
 function MeasurementForm({patientId}: {
@@ -116,143 +92,288 @@ function MeasurementForm({patientId}: {
     const {user, isSignedIn,} = useUser()
     const doctor = useQuery(api.doctors.getDoctor, {userId: user?.id ?? undefined})
     const predict = useMutation(api.records.createRecord)
-    const [formKey, setFormKey] = useState<number>(0);
     const {toast} = useToast()
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: patient ? {
+            ...defaultValues,
+            sex: patient.sex.toString(),
+            age: calculateAge(patient.dob).toString()
+        } : defaultValues
+    })
 
 
-    const initialValuesTest: formTypes = {
-        age: null,
-        sex: null,
-        cp: null,
-        trtbps: null,
-        chol: null,
-        fbs: null,
-        restecg: null,
-        exang: null,
-        oldpeak: null,
-        slope: null,
-        ca: null,
-        thal: null,
-    };
-
-    const handleSubmit = async (values: typeof initialValuesTest, actions: FormikHelpers<typeof validationSchema>) => {
-        if (isSignedIn && doctor){
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        if (isSignedIn && doctor) {
             try {
-                const {risk: _risk, recordId} = await predict({
+
+                const parsedValues = {
+                    age: parseInt(values.age, 10),
+                    cp: parseInt(values.cp, 10),
+                    sex: parseInt(values.sex, 10),
+                    trtbps: parseInt(values.trtbps, 10),
+                    chol: parseInt(values.chol, 10),
+                    fbs: parseInt(values.fbs, 10),
+                    restecg: parseInt(values.restecg, 10),
+                    exang: parseInt(values.exang, 10),
+                    oldpeak: parseInt(values.oldpeak, 10),
+                    slope: parseInt(values.slope, 10),
+                    ca: parseInt(values.ca, 10),
+                    thal: parseInt(values.thal, 10),
+                }
+
+                const { risk: _risk, recordId } = await predict({
                     patientId: patientId as Id<'patients'> ?? undefined,
                     orgId: doctor.orgId ?? undefined,
                     doctorId: doctor._id ?? undefined,
-                    age: values.age,
-                    sex: values.sex,
-                    cp: values.cp,
-                    trtbps: values.trtbps,
-                    chol: values.chol,
-                    fbs: values.fbs,
-                    restecg: values.restecg,
-                    exang: values.exang,
-                    oldpeak: values.oldpeak,
-                    slope: values.slope,
-                    ca: values.ca,
-                    thal: values.thal
+                    ...parsedValues,
                 });
-                setRisk(_risk)
-                setOpen(true)
-                setRecordId(recordId)
+                setRisk(_risk);
+                setOpen(true);
+                setRecordId(recordId);
 
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
-                toast({title: 'Error submitting ', description: errorMessage, variant: 'destructive'})
+                toast({ title: 'Error submitting ', description: errorMessage, variant: 'destructive' });
             }
-        }    };
+        }
+    }
+;
 
-    const handleReset = (formikProps: FormikHelpers<typeof initialValuesTest>) => {
-        formikProps.resetForm({ values: initialValuesTest });
-        setOpen(false);
-        setFormKey(prevKey => prevKey + 1);
-    };
-
+    console.log({values: form.getValues()})
     return (
         <>
-            {risk && recordId ? <PredictionResult recordId={recordId} open={open} setOpen={setOpen} patientId={patientId} risk={risk}/> : null}
+            {risk && recordId ?
+                <PredictionResult recordId={recordId} open={open} setOpen={setOpen} patientId={patientId}
+                                  risk={risk}/> : null}
 
             <div className={'w-full flex gap-2 justify-end'}>
                 <Glossary/>
             </div>
-            <Formik
-                initialValues={initialValuesTest}
-                validationSchema={validationSchema}
-                onSubmit={handleSubmit}
-            >
-                {(formikProps) => (
-                    <Form>
-                        <div className={'flex flex-row h-full'}>
-                            {patientId && patient &&
-                                <div className={'w-[20%] h-fit ml-2 pt-3 px-2 rounded-md shadow-accent bg-gradient-to-b from-blue-100 to-red-200'}>
-                                    <PatientCard patient={patient}/>
-                                </div>
-                                }
-                                <div className={`w-[${patientId ? 70 : 100}%]`}>
-                                    <div className={`flex flex-wrap h-[90%] justify-around items-center overflow-y-scroll`}>
-                                        {Object.keys(fieldsDetails).map((fieldName) => (
-                                            <div key={fieldName} className="flex flex-wrap gap-1 w-[280px] mx-2 h-[100px] p-3">
-                                                <label htmlFor={fieldName} className="text-sm">
-                                                    {fieldsDetails[fieldName].label}
-                                                </label>
-                                                {fieldsDetails[fieldName].type === 'select' ? (
-                                                    <Field as="select" name={fieldName}
-                                                           className="w-full p-1 bg-white text-xs h-[32px] mt-1">
-                                                        {fieldsDetails[fieldName].options?.map((option) => (
-                                                            <option key={option.value} value={option.value}>
-                                                                {option.label}
-                                                            </option>
-                                                        ))}
-                                                    </Field>
-                                                ) : (
-                                                    <Field type={"text"} name={fieldName} className="w-full p-1 mt-1 placeholder:text-xs"/>
-                                                )}
-                                                <div className="text-xs text-red-500 w-full h-[18px]">
-                                                    <ErrorMessage name={fieldName}/>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="w-full flex py-3 items-center justify-center">
-                                        <Button className={'mr-3'} type="submit" disabled={(formikProps.isSubmitting || !(isSignedIn && doctor) )}>
-                                            {formikProps.isSubmitting ?
-                                                <>
-                                                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin"/>
-                                                    Please wait
-                                                </>
-                                                :
-                                                <>Submit</>
-                                            }
-                                        </Button>
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button type="button" variant="destructive">
-                                                    Reset
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        This action cannot delete the recordings.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleReset(formikProps)}>Continue</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
-                                </div>
+            {patientId && patient &&
+                <div
+                    className={'w-[20%] h-fit ml-2 pt-3 px-2 rounded-md shadow-accent bg-gradient-to-b from-blue-100 to-red-200'}>
+                    <PatientCard patient={patient}/>
+                </div>
+            }
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-8 [&>*]:min-w-[300px] align-baseline justify-around [&>*:first-child]:hidden p-3 flex flex-wrap gap-5">
 
-                        </div>
-                    </Form>
-                )}
-            </Formik>
+                    <div className={'w-[300px] h-[72px]'}></div>
+                    {
+                        patient
+                            ?
+                            <FormField
+                                control={form.control}
+                                name="age"
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>age</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="age" {...field} />
+                                        </FormControl>
+                                        <FormMessage/>
+                                    </FormItem>
+                                )}
+
+                            />
+                            :
+                            null
+                    }
+
+                    <FormField
+                        control={form.control}
+                        name="cp"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>cp</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="cp" {...field} required/>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="trtbps"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>trtbps</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="trtbps" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="chol"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>chol</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="chol" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="fbs"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>fbs</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="fbs" {...field} />
+                                </FormControl>
+
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="restecg"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>restecg</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="restecg" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="exang"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>exang</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="exang" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="oldpeak"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>oldpeak</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="oldpeak" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="slope"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>slope</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="slope" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="ca"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>ca</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="ca" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="thal"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormLabel>thal</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="thal" {...field} />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    {
+                        patient
+                            ?
+                            <FormField
+                                control={form.control}
+                                name="sex"
+                                render={({field}) => (
+                                    <FormItem>
+                                        <FormLabel>sex</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select sex"/>
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="1">Male</SelectItem>
+                                                <SelectItem value="0">Female</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage/>
+                                    </FormItem>
+                                )}
+                            />
+                            :
+                            null
+                    }
+                    <div className="w-full flex py-3 items-center justify-center">
+                        <Button className={'mr-3'} type="submit"
+                                disabled={(form.formState.isSubmitting || !(isSignedIn && doctor))}>
+                            {form.formState.isSubmitting ?
+                                <>
+                                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin"/>
+                                    Please wait
+                                </>
+                                :
+                                <>Submit</>
+                            }
+                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button type="reset" variant="destructive">
+                                    Reset
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot delete the recordings.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => form.reset()}>Continue</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
+                </form>
+            </Form>
 
         </>
     );

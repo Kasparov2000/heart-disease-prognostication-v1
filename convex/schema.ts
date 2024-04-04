@@ -80,6 +80,7 @@ export default defineSchema({
         email: v.string(),
         idNumber: v.string(),
         name: v.string(),
+        sex: v.number(),
         phone: v.string(),
         profilePicId: v.optional(v.id("_storage")),
         state: v.string(),

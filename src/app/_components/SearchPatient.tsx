@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useContext, useEffect } from 'react';
+import React, {ChangeEvent, useCallback, useContext, useDeferredValue, useEffect, useRef} from 'react';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { Input } from '@/components/ui/input';
@@ -6,18 +6,25 @@ import { PatientContext } from "../../../contexts/PatientContext";
 
 export function SearchPatient() {
     const { state, dispatch } = useContext(PatientContext);
-
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-        dispatch({ type: 'SET_SEARCH_TERM', payload: e.target.value });
-    };
-
-    // Fetch patients based on the current search term
-    const fetchedPatients = useQuery(api.patients.searchPatients, { name: state.searchTerm }) ?? [];
-
-    // Update search results when patients data changes
+    const deferredSearchTerm = useDeferredValue(state.searchTerm);
+    const queryResult = useQuery(api.patients.searchPatients, { name: deferredSearchTerm });
     useEffect(() => {
-        dispatch({ type: 'SET_SEARCH_RESULTS', payload: fetchedPatients });
-    }, [fetchedPatients, dispatch]);
+        if (queryResult) {
+            dispatch({ type: 'SET_SEARCH_RESULTS', payload: queryResult });
+        }
+    }, [queryResult]);
+
+    useEffect(() => {
+        if (!queryResult && !state.isLoading) {
+            dispatch({ type: 'SET_IS_LOADING', payload: true });
+        } else if (queryResult && state.isLoading) {
+            dispatch({ type: 'SET_IS_LOADING', payload: false });
+        }
+    }, [queryResult, state.isLoading]);
+
+    const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+        dispatch({ type: 'SET_SEARCH_TERM', payload: e.target.value });
+    }, [dispatch]);
 
     return (
         <div className={'relative flex justify-between gap-2'}>
@@ -26,11 +33,7 @@ export function SearchPatient() {
                     placeholder={'Search Patient ...'}
                     value={state.searchTerm}
                     onChange={handleInputChange}
-                    onFocus={() => {
-                        if (!state.isSearching) {
-                            dispatch({ type: 'TOGGLE_IS_SEARCHING', payload: true });
-                        }
-                    }}
+                    onFocus={() => dispatch({ type: 'TOGGLE_IS_SEARCHING', payload: true })}
                 />
             </div>
         </div>
