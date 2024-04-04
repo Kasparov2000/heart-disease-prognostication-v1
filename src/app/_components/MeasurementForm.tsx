@@ -15,7 +15,7 @@ import {
 import {useMutation, useQuery} from "convex/react";
 import {api} from "../../../convex/_generated/api";
 import {useToast} from "@/components/ui/use-toast";
-import {Doc, Id} from '../../../convex/_generated/dataModel';
+import {Id} from '../../../convex/_generated/dataModel';
 import PredictionResult from "@/app/_components/PredictionResult";
 import Glossary from "@/app/_components/Glossary";
 import PatientCard, {calculateAge} from "@/app/_components/PatientCard";
@@ -138,7 +138,6 @@ function MeasurementForm({patientId}: {
             }
         }
     }
-;
 
     console.log({values: form.getValues()})
     return (

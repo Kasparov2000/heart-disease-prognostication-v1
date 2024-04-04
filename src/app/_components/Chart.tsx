@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import ReactApexChart from 'react-apexcharts';
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import {Id} from "../../../convex/_generated/dataModel";
+import dynamic from "next/dynamic";
 
+const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 interface SeriesData {
     name: string;
     data: { x: number; y: number }[];
