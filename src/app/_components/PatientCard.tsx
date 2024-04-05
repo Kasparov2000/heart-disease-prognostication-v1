@@ -23,9 +23,9 @@ const PatientCard: React.FC<PatientCardProps> = ({patient}) => {
     const fullAddress = `${patient.city}, ${patient.state}, ${patient.country}`;
 
     return (
-        <div className="flex flex-col p-2 justify-center items-center h-fit gap-6">
+        <div className="flex flex-col p-2 justify-center items-center h-fit gap-4">
             {/* Profile Image */}
-            <div className={'w-[200px] h-[200px] rounded-xl overflow-hidden'}>
+            <div className={'w-[200px] max-h-[200px] rounded-xl overflow-hidden'}>
                 {
                     <Image
                         src={'https://expert-oyster-775.convex.cloud/api/storage/76202815-440d-49d0-a56c-06f9cab1efca'}
