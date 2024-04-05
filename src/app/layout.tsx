@@ -4,6 +4,7 @@ import './globals.css'
 import ConvexClientProvider from "@/app/ConvexClientProvider";
 import {Header} from "@/app/header";
 import { Toaster } from "@/components/ui/toaster"
+import {RedirectToSignIn, SignedOut} from "@clerk/nextjs";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,6 +28,9 @@ export default function RootLayout({
               {children}
               <Toaster/>
             </div>
+            <SignedOut>
+              <RedirectToSignIn redirectUrl={'/'} />
+            </SignedOut>
           </ConvexClientProvider>
         </div>
       </body>
