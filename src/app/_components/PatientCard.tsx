@@ -27,8 +27,7 @@ const PatientCard: React.FC<PatientCardProps> = ({patient}) => {
             {/* Profile Image */}
             <div className={'w-[200px] h-[200px] rounded-xl overflow-hidden'}>
                 {
-                    <ImageWithFallback
-                        fallback={patient.sex === 0 ? '/profile-pics-placeholder/female.jpg' : '/profile-pics-placeholder/male.webp'}
+                    <Image
                         src={'https://expert-oyster-775.convex.cloud/api/storage/76202815-440d-49d0-a56c-06f9cab1efca'}
                         alt={'Profile picture.'}
                         style={{objectFit: "fill"}}
