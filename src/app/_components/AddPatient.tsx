@@ -78,38 +78,36 @@ function AddPatient() {
         try {
             const fileInput = document.getElementById('profilePicId') as HTMLInputElement | null;
             const file = fileInput?.files?.[0] ?? null;
+            let storageId = null;
 
-            if (!file) {
-                throw new Error("Profile picture is missing");
+            if (file) {
+                const postUrl = await generateUploadUrl();
+
+                const uploadResult = await fetch(postUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": file.type },
+                    body: file,
+                });
+
+                if (!uploadResult.ok) {
+                    throw new Error(uploadResult.statusText);
+                }
+
+                const uploadResponse = await uploadResult.json();
+                storageId = uploadResponse.storageId;
+                if (!storageId) {
+                    throw new Error("Failed to retrieve storage ID after upload");
+                }
             }
 
-            formData.profilePicture = file;
-            const { profilePicture, ...patientData } = formData;
-            const postUrl = await generateUploadUrl();
-
-            const uploadResult = await fetch(postUrl, {
-                method: "POST",
-                headers: { "Content-Type": profilePicture.type },
-                body: profilePicture,
-            });
-
-            if (!uploadResult.ok) {
-                throw new Error(uploadResult.statusText);
-            }
-
-            const { storageId } = await uploadResult.json();
-            if (!storageId) {
-                throw new Error("Failed to retrieve storage ID after upload");
-            }
-
-            const patientSubmissionData = { profilePicId: storageId, ...patientData };
+            const patientSubmissionData = storageId ? { profilePicId: storageId, ...formData } : formData;
             const patientId = await createPatient(patientSubmissionData);
-            form.reset()
-            if (!dialogOpen) {
-                setDialogOpen(false)
+            form.reset();
+            if (dialogOpen) {
+                setDialogOpen(false);
             }
             toast({ title: "Patient created", description: "Now you can make predictions" });
-            router.push(`/dashboard/doctor?currentPatient=${patientId}`)
+            router.push(`/dashboard/doctor?currentPatient=${patientId}`);
 
         } catch (err) {
             const error =
