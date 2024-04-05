@@ -28,9 +28,6 @@ export default function RootLayout({
               {children}
               <Toaster/>
             </div>
-            <SignedOut>
-              <RedirectToSignIn redirectUrl={'/'} />
-            </SignedOut>
           </ConvexClientProvider>
         </div>
       </body>
