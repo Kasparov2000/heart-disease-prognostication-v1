@@ -43,7 +43,7 @@ const formSchema = z.object({
     state: z.string().min(1, 'State/Province is required')
         .regex(/^[a-zA-Z\s-]+$/, 'Invalid state name'),
     zipCode: z.string().min(1, 'ZIP/Postal code is required'),
-    profilePicture: z.any().optional()
+    profilePictureId: z.any().optional()
 });
 
 
