@@ -43,7 +43,7 @@ const formSchema = z.object({
     state: z.string().min(1, 'State/Province is required')
         .regex(/^[a-zA-Z\s-]+$/, 'Invalid state name'),
     zipCode: z.string().min(1, 'ZIP/Postal code is required'),
-    profilePictureId: z.any().optional()
+    profilePicture: z.any().optional()
 });
 
 
@@ -101,6 +101,7 @@ function AddPatient() {
             }
 
             const patientSubmissionData = storageId ? { profilePicId: storageId, ...formData } : formData;
+            delete patientSubmissionData.profilePicture
             const patientId = await createPatient(patientSubmissionData);
             form.reset();
             if (dialogOpen) {
