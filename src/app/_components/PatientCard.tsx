@@ -31,6 +31,7 @@ const PatientCard: React.FC<PatientCardProps> = ({patient}) => {
                         src={'https://expert-oyster-775.convex.cloud/api/storage/76202815-440d-49d0-a56c-06f9cab1efca'}
                         alt={'Profile picture.'}
                         style={{objectFit: "fill"}}
+                        unoptimized
                     />
 
                 }
