@@ -23,9 +23,31 @@ export const createRecord = mutation({
     },
     handler: async (ctx, args) => {
         // Inserting record data into the 'records' table
-        // Returning the newly created record
-        const risk = Math.floor((Math.random() * 100))
+        const riskResponse = await fetch('https://heart-disease-prognistication-v1-model.onrender.com/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                age: args.age,
+                sex: args.sex,
+                cp: args.cp,
+                trestbps: args.trtbps,
+                chol: args.chol,
+                fbs: args.fbs,
+                restecg: args.restecg,
+                exang: args.exang,
+                oldpeak: args.oldpeak,
+                slope: args.slope,
+                ca: args.ca,
+                thal: args.thal
+            })
+        }).then(res => res.json());
+
+        const risk = riskResponse.prediction_percentage
+
         if (!args.patientId) return {risk, recordId: null}
+
 
         const prevRecord = await ctx.db.query("records")
             .filter(q => q.eq(q.field("patientId"), args.patientId))

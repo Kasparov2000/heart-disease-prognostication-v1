@@ -89,7 +89,7 @@ export const checkSubscriptionStatus = query({
 
         const currentDate = new Date();
         const subscriptionEndDate = new Date(subscription._creationTime);
-        subscriptionEndDate.setDate(subscriptionEndDate.getDate() + 30);
+        subscriptionEndDate.setMinutes(subscriptionEndDate.getMinutes() + 10);
         const isSubscriptionValid = currentDate < subscriptionEndDate;
 
         return {

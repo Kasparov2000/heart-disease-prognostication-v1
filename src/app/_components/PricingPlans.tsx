@@ -26,10 +26,12 @@ function PricingPlans() {
     const premiumFeatures = ["Patient data storage (unlimited)", "Data analytics"];
     const user = useAuth()
     const router = useRouter()
-
     const searchParams = useSearchParams()
     const orgId = searchParams.get('orgId')
 
+    if (!orgId) {
+        return notFound()
+    }
 
     if (!user.isLoaded) {
         return (
