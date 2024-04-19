@@ -10,7 +10,7 @@ import {useAuth} from "@clerk/nextjs";
 import LoadingAnimation from "@/app/_components/Loading";
 import {useRouter} from "next/navigation";
 
-export default function (){
+export default function Page (){
     const {isLoaded, userId, isSignedIn} = useAuth();
     const router = useRouter()
     if (!isLoaded) {
