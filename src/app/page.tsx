@@ -10,7 +10,7 @@ import {useAuth} from "@clerk/nextjs";
 import LoadingAnimation from "@/app/_components/Loading";
 import {useRouter} from "next/navigation";
 
-const Homepage = () => {
+export default function (){
     const {isLoaded, userId, isSignedIn} = useAuth();
     const router = useRouter()
     if (!isLoaded) {
@@ -19,7 +19,6 @@ const Homepage = () => {
     if (isSignedIn) {
         return router.push('/dashboard/doctor/')
     }
-
 
     return (
         <motion.div
@@ -54,5 +53,3 @@ const Homepage = () => {
         </motion.div>
     );
 };
-
-export default Homepage;

@@ -2,7 +2,7 @@
 import {Button} from "@/components/ui/button";
 import {Badge} from "@/components/ui/badge";
 import {SignedIn, useAuth, useOrganization, useOrganizations, useUser} from "@clerk/nextjs";
-import {notFound, useParams, useRouter, useSearchParams} from "next/navigation";
+import {notFound, useParams, usePathname, useRouter, useSearchParams} from "next/navigation";
 import {Loader2} from "lucide-react";
 
 function PlanFeatures({ features }: { features: string[] }) {
@@ -27,13 +27,15 @@ function PricingPlans() {
     const user = useAuth()
     const router = useRouter()
     const searchParams = useSearchParams()
+    const isHomePage = usePathname()
     const orgId = searchParams.get('orgId')
+    console.log({isHomePage})
 
-    if (!orgId) {
+    if (!orgId && isHomePage !== '/') {
         return notFound()
     }
 
-    if (!user.isLoaded) {
+    if (!user.isLoaded && isHomePage !== '/') {
         return (
             <div className={'w-full h-full'}>
                 <Loader2 className="m-auto h-10 w-10 animate-spin" />
